@@ -126,6 +126,12 @@ public class ChangeStreamDataCapture {
                 return this;
             }
             public Builder messageWaitTime(int waitTimeInMillis) {
+                // the wait time simulate the I/O latency,
+                // should not be less than zero
+                if (waitTimeInMillis <= 0) {
+                    System.err.println("wait time must be at least 1 millisecond, resetting to 1");
+                    waitTimeInMillis = 1;
+                }
                 this.messageWaitTimeInMillis = waitTimeInMillis;
                 return this;
             }
