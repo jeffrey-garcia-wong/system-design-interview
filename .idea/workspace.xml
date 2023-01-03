@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="063e28c0-aaed-406c-b2cc-b9e8ffdddcf8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/io/jeffrey/messaging/transactionalOutbox/ChangeStreamDataCaptureTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/io/jeffrey/messaging/transactionalOutbox/ChangeStreamDataCaptureTests.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,7 +46,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests.test_008">
+  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests.test_006">
     <configuration name="ChangeStreamDataCaptureTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
@@ -132,9 +128,9 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_006" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_008" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_007" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_006" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests" />
       </list>

@@ -481,7 +481,18 @@ public class ChangeStreamDataCaptureTests {
     }
 
     /**
+     * Demonstrate multiple threads each with its
+     * own resume token, where a crash happened
+     * during the message processing and therefore
+     * the message state should be rolled back.
      *
+     * The new thread which pick-up the process
+     * should then resume from the rolled back
+     * message to guarantee the "at-least-once"
+     * semantics is held.
+     *
+     * Downstream message consumer should then
+     * expect to receive duplicated messages.
      */
     @Test
     @Timeout(5)
@@ -574,7 +585,7 @@ public class ChangeStreamDataCaptureTests {
                 if (!processed.containsKey(input[cursor])) {
                     processed.put(input[cursor], "PROCESSING");
                     System.out.println(currentThreadId + ", processing: " + input[cursor]);
-                    if (cursor == 4) {
+                    if (cursor >= 4) {
                         // simulate crash and rollback
                         processed.remove(input[cursor]);
                         break;
