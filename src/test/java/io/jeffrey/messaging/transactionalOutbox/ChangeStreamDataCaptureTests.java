@@ -657,11 +657,12 @@ public class ChangeStreamDataCaptureTests {
     /**
      * Demonstrate scaling out with additional
      * threads with simulation of I/O latency
-     * to process each message from the outbox
+     * while processing each message from the
+     * outbox
      */
     @Test
     @Timeout(2)
-    public void test_008() throws InterruptedException {
+    public void test_007() throws InterruptedException {
         final int MAX_THREAD_COUNT = 3;
         final int MESSAGES_COUNT = 100;
         final int IO_WAIT_TIME_IN_MILLIS = 10;
@@ -671,173 +672,73 @@ public class ChangeStreamDataCaptureTests {
         }
 
         final ConcurrentMap<Integer, String> processed = new ConcurrentHashMap<>();
-//        final CountDownLatch latch = new CountDownLatch(input.length);
         final CountDownLatch latch = new CountDownLatch(MAX_THREAD_COUNT);
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_THREAD_COUNT);
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
 
-        Function<String, Object[]> lookupResumeToken = (currentThreadId) -> {
-            // find the least resume token
-            final long currentTime = System.nanoTime();
-            long minElapsed = 0;
-            long maxElapsed = 0;
-            String threadId = null;
-            int maxResumeToken = 0;
-            int minResumeToken = 0;
-            System.out.println(currentThreadId + ", available workers: " + workers.keySet());
-            for (Map.Entry<String, Object[]> entry : workers.entrySet()) {
-                Object[] state = entry.getValue();
-                long elapsed = currentTime - (long)state[1];
-                if (elapsed > (long)IO_WAIT_TIME_IN_MILLIS * 1000000000L && elapsed > maxElapsed) {
-                    maxResumeToken = (int) state[0];
-                    threadId = entry.getKey();
-                    maxElapsed = elapsed;
-                }
-                if (minElapsed == 0 || elapsed < minElapsed) {
-                    minResumeToken = (int) state[0];
-                    minElapsed = elapsed;
-                }
-            }
-            Object[] result = new Object[3];
-            result[0] = threadId == null ? minResumeToken : maxResumeToken;
-            result[1] = threadId;
-            result[2] = threadId == null ? minElapsed : maxElapsed;
-            return result;
-        };
-
         executorService.schedule(() -> {
-            final String currentThreadId = "Thread 1";
-            Object[] result = lookupResumeToken.apply(currentThreadId);
+            final String currentThreadId = "Thread-1";
+            ChangeStreamDataCapture.ChangeStreamTask thread1 =
+                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
+                            .threadId(currentThreadId)
+                            .outbox(input)
+                            .eventStore(processed)
+                            .messageWaitTime(IO_WAIT_TIME_IN_MILLIS)
+                            .workersState(workers)
+                            .debug()
+                            .create();
+
+            Object[] result = thread1.lookupResumeToken(currentThreadId);
             int resumeToken = (int) result[0];
             String threadId = (String) result[1];
             assertEquals(0, resumeToken);
             assertNull(threadId);
 
-            if (threadId == null) {
-                threadId = currentThreadId;
-                System.out.println(threadId + " will spawn at: " + resumeToken);
-            } else {
-                System.out.println(currentThreadId + " will resume " + threadId + " at: " + resumeToken);
-            }
-
-            for (int cursor=resumeToken; cursor<input.length; cursor++) {
-                if (!processed.containsKey(input[cursor])) {
-                    processed.put(input[cursor], "PROCESSING");
-                    System.out.println(currentThreadId + ", processing: " + input[cursor]);
-
-                    // simulate lengthy I/O
-                    try {
-                        CompletableFuture.supplyAsync(() -> {
-                            try {
-                                Thread.sleep(IO_WAIT_TIME_IN_MILLIS);
-                            } catch (InterruptedException ignored) {}
-                            return null;
-                        }).get();
-                    } catch (InterruptedException|ExecutionException ignored) {}
-
-                    // commit
-                    processed.put(input[cursor], "COMPLETED");
-                }
-                // update resume token timestamp and threadId
-                Object[] state = workers.getOrDefault(threadId, new Object[]{ resumeToken, System.nanoTime() });
-                assertNotNull(state);
-                state[0] = (int)state[0] + 1;
-                state[1] = System.nanoTime();
-                workers.remove(threadId);
-                threadId = currentThreadId;
-                workers.put(threadId, state);
-            }
+            thread1.run();
             latch.countDown();
         }, 0, TimeUnit.MICROSECONDS);
 
         executorService.schedule(() -> {
-            final String currentThreadId = "Thread 2";
-            Object[] result = lookupResumeToken.apply(currentThreadId);
+            final String currentThreadId = "Thread-2";
+            ChangeStreamDataCapture.ChangeStreamTask thread2 =
+                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
+                            .threadId(currentThreadId)
+                            .outbox(input)
+                            .eventStore(processed)
+                            .messageWaitTime(IO_WAIT_TIME_IN_MILLIS)
+                            .workersState(workers)
+                            .debug()
+                            .create();
+
+            Object[] result = thread2.lookupResumeToken(currentThreadId);
             int resumeToken = (int) result[0];
             String threadId = (String) result[1];
             assertEquals(0, resumeToken);
             assertNull(threadId);
 
-            if (threadId == null) {
-                threadId = currentThreadId;
-                System.out.println(threadId + " will spawn at: " + resumeToken);
-            } else {
-                System.out.println(currentThreadId + " will resume " + threadId + " at: " + resumeToken);
-            }
-
-            for (int cursor=resumeToken; cursor<input.length; cursor++) {
-                if (!processed.containsKey(input[cursor])) {
-                    processed.put(input[cursor], "PROCESSING");
-                    System.out.println(currentThreadId + ", processing: " + input[cursor]);
-
-                    // simulate lengthy I/O
-                    try {
-                        CompletableFuture.supplyAsync(() -> {
-                            try {
-                                Thread.sleep(500);
-                            } catch (InterruptedException ignored) {}
-                            return null;
-                        }).get();
-                    } catch (InterruptedException|ExecutionException ignored) {}
-
-                    // commit
-                    processed.put(input[cursor], "COMPLETED");
-                }
-                // update resume token timestamp and threadId
-                Object[] state = workers.getOrDefault(threadId, new Object[]{ resumeToken, System.nanoTime() });
-                assertNotNull(state);
-                state[0] = (int)state[0] + 1;
-                state[1] = System.nanoTime();
-                workers.remove(threadId);
-                threadId = currentThreadId;
-                workers.put(threadId, state);
-            }
+            thread2.run();
             latch.countDown();
         }, 0, TimeUnit.MICROSECONDS);
 
-        // simulate scale out of the 3rd thread after 500 ms
+        // simulate scale out of the 3rd thread after certain time
         executorService.schedule(() -> {
-            final String currentThreadId = "Thread 3";
-            Object[] result = lookupResumeToken.apply(currentThreadId);
-            int resumeToken = (int) result[0];
+            final String currentThreadId = "Thread-3";
+
+            ChangeStreamDataCapture.ChangeStreamTask thread3 =
+                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
+                            .threadId(currentThreadId)
+                            .outbox(input)
+                            .eventStore(processed)
+                            .messageWaitTime(IO_WAIT_TIME_IN_MILLIS)
+                            .workersState(workers)
+                            .debug()
+                            .create();
+
+            Object[] result = thread3.lookupResumeToken(currentThreadId);
             String threadId = (String) result[1];
-            assertTrue(resumeToken>0 && resumeToken<input.length);
             assertNull(threadId);
 
-            if (threadId == null) {
-                threadId = currentThreadId;
-                System.out.println(threadId + " will spawn at: " + resumeToken);
-            } else {
-                System.out.println(currentThreadId + " will resume " + threadId + " at: " + resumeToken);
-            }
-
-            for (int cursor=resumeToken; cursor<input.length; cursor++) {
-                if (!processed.containsKey(input[cursor])) {
-                    processed.put(input[cursor], "PROCESSING");
-                    System.out.println(currentThreadId + ", processing: " + input[cursor]);
-
-                    // simulate lengthy I/O
-                    try {
-                        CompletableFuture.supplyAsync(() -> {
-                            try {
-                                Thread.sleep(500);
-                            } catch (InterruptedException ignored) {}
-                            return null;
-                        }).get();
-                    } catch (InterruptedException|ExecutionException ignored) {}
-
-                    // commit
-                    processed.put(input[cursor], "COMPLETED");
-                }
-                // update resume token timestamp and threadId
-                Object[] state = workers.getOrDefault(threadId, new Object[]{ resumeToken, System.nanoTime() });
-                assertNotNull(state);
-                state[0] = (int)state[0] + 1;
-                state[1] = System.nanoTime();
-                workers.remove(threadId);
-                threadId = currentThreadId;
-                workers.put(threadId, state);
-            }
+            thread3.run();
             latch.countDown();
         }, MESSAGES_COUNT*IO_WAIT_TIME_IN_MILLIS/2, TimeUnit.MILLISECONDS);
 

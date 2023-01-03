@@ -15,6 +15,7 @@ public class ChangeStreamDataCapture {
         private final ConcurrentMap<String, Object[]> workers;
         private int messageWaitTimeInMillis;
         private boolean debug;
+        private final int crashAndRollback;
 
         protected static class Builder {
             private String currentThreadId;
@@ -23,6 +24,7 @@ public class ChangeStreamDataCapture {
             private ConcurrentMap<String, Object[]> workers;
             private int messageWaitTimeInMillis;
             private boolean debug = false;
+            private int crashAndRollback = -1;
 
             protected Builder() {}
             public Builder threadId(String threadId) {
@@ -45,6 +47,10 @@ public class ChangeStreamDataCapture {
                 this.messageWaitTimeInMillis = waitTimeInMillis;
                 return this;
             }
+            public Builder crashAndRollback(int crashAndRollback) {
+                this.crashAndRollback = crashAndRollback;
+                return this;
+            }
             public Builder debug() {
                 this.debug = true;
                 return this;
@@ -54,8 +60,6 @@ public class ChangeStreamDataCapture {
             }
         }
 
-        private final Object[] initResult;
-
         private ChangeStreamTask(Builder builder) {
             this.currentThreadId = builder.currentThreadId;
             this.input = builder.input;
@@ -63,40 +67,40 @@ public class ChangeStreamDataCapture {
             this.workers = builder.workers;
             this.messageWaitTimeInMillis = builder.messageWaitTimeInMillis;
             this.debug = builder.debug;
-
-            // find the least resume token
-            Function<String, Object[]> lookupResumeToken = (currentThreadId) -> {
-                final long currentTime = System.nanoTime();
-                long minElapsed = 0;
-                long maxElapsed = 0;
-                String threadId = null;
-                int maxResumeToken = 0;
-                int minResumeToken = 0;
-                System.out.println(currentThreadId + ", available workers: " + workers.keySet());
-                for (Map.Entry<String, Object[]> entry : workers.entrySet()) {
-                    Object[] state = entry.getValue();
-                    long elapsed = currentTime - (long)state[1];
-                    if (elapsed > (long)messageWaitTimeInMillis * 1000000000L && elapsed > maxElapsed) {
-                        maxResumeToken = (int) state[0];
-                        threadId = entry.getKey();
-                        maxElapsed = elapsed;
-                    }
-                    if (minElapsed == 0 || elapsed < minElapsed) {
-                        minResumeToken = (int) state[0];
-                        minElapsed = elapsed;
-                    }
-                }
-                Object[] result = new Object[3];
-                result[0] = threadId == null ? minResumeToken : maxResumeToken;
-                result[1] = threadId;
-                result[2] = threadId == null ? minElapsed : maxElapsed;
-                return result;
-            };
-            this.initResult = lookupResumeToken.apply(currentThreadId);
+            this.crashAndRollback = builder.crashAndRollback;
         }
 
-        protected Object[] getInitResult() {
-            return new Object[] { initResult[0], initResult[1] };
+        private Object[] initResult;
+
+        // find the least resume token
+        protected Object[] lookupResumeToken(String currentThreadId) {
+            final long currentTime = System.nanoTime();
+            long minElapsed = 0;
+            long maxElapsed = 0;
+            String threadId = null;
+            int maxResumeToken = 0;
+            int minResumeToken = 0;
+            if (debug) System.out.println(currentThreadId + ", available workers: " + workers.keySet());
+            for (Map.Entry<String, Object[]> entry : workers.entrySet()) {
+                Object[] state = entry.getValue();
+                long elapsed = currentTime - (long)state[1];
+                if (elapsed > (long)messageWaitTimeInMillis * 1000000000L && elapsed > maxElapsed) {
+                    maxResumeToken = (int) state[0];
+                    threadId = entry.getKey();
+                    maxElapsed = elapsed;
+                }
+                if (minElapsed == 0 || elapsed < minElapsed) {
+                    minResumeToken = (int) state[0];
+                    minElapsed = elapsed;
+                }
+            }
+            Object[] result = new Object[3];
+            result[0] = threadId == null ? minResumeToken : maxResumeToken;
+            result[1] = threadId;
+            result[2] = threadId == null ? minElapsed : maxElapsed;
+
+            this.initResult = result;
+            return new Object[] { result[0], result[1], result[2] };
         }
 
         @Override
@@ -115,6 +119,12 @@ public class ChangeStreamDataCapture {
                 if (!processed.containsKey(input[cursor])) {
                     processed.put(input[cursor], "PROCESSING");
                     if (debug) System.out.println(currentThreadId + ", processing: " + input[cursor]);
+
+                    if (crashAndRollback>=0 && crashAndRollback <= cursor) {
+                        // simulate crash and rollback
+                        processed.remove(input[cursor]);
+                        break;
+                    }
 
                     // simulate lengthy I/O
                     try {
