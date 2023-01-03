@@ -16,7 +16,7 @@ public class ChangeStreamDataCaptureTests {
 
     /**
      * Base test case which demonstrate the normal flow (happy path)
-     * where the input is distributed among the threads and fully
+     * where the messages are distributed among the threads and fully
      * processed.
      */
     @Test
@@ -80,11 +80,11 @@ public class ChangeStreamDataCaptureTests {
     }
 
     @Test
-    @Timeout(10)
+    @Timeout(5)
     public void test_001_bulkMessages_maxCores() throws InterruptedException {
         final int cores = Runtime.getRuntime().availableProcessors() - 2;
         final int MAX_THREAD_COUNT = cores;
-        final int MESSAGES_COUNT = 100000;
+        final int MESSAGES_COUNT = 600000;
         final long IO_WAIT_TIME_IN_NANOS = 10L;
         final int[] MESSAGES = new int [MESSAGES_COUNT];
         for (int i=0; i<MESSAGES.length; i++) {
@@ -243,7 +243,7 @@ public class ChangeStreamDataCaptureTests {
      */
     @Test
     public void test_003() throws InterruptedException {
-
+        
     }
 
     /**
@@ -261,7 +261,7 @@ public class ChangeStreamDataCaptureTests {
      * expect to receive duplicated messages.
      */
     @Test
-    @Timeout(5)
+    @Timeout(1)
     public void test_004() throws InterruptedException {
         final int MAX_THREAD_COUNT = 2;
         final int MESSAGES_COUNT = 10;
@@ -381,10 +381,10 @@ public class ChangeStreamDataCaptureTests {
      * each message from the outbox
      */
     @Test
-    @Timeout(5)
+    @Timeout(1)
     public void test_005() throws InterruptedException {
         final int MAX_THREAD_COUNT = 3;
-        final int MESSAGES_COUNT = 10;
+        final int MESSAGES_COUNT = 100;
         final long IO_WAIT_TIME_IN_NANOS = 1000000L;
         final int[] MESSAGES = new int [MESSAGES_COUNT];
         for (int i=0; i<MESSAGES.length; i++) {

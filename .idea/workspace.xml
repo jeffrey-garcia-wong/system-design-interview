@@ -64,7 +64,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_001_bulkMessages" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="ChangeStreamDataCaptureTests.test_001_bulkMessages_maxCores" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
         <pattern>
@@ -74,13 +74,13 @@
       </extension>
       <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
       <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_001_bulkMessages" />
+      <option name="METHOD_NAME" value="test_001_bulkMessages_maxCores" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_001_bulkMessages_bulkNodes" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="ChangeStreamDataCaptureTests.test_002" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
         <pattern>
@@ -90,7 +90,7 @@
       </extension>
       <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
       <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_001_bulkMessages_bulkNodes" />
+      <option name="METHOD_NAME" value="test_002" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -131,10 +131,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_004" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001_bulkMessages" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001_bulkMessages_maxCores" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_002" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001_bulkMessages_bulkNodes" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_004" />
       </list>
     </recent_temporary>
   </component>

@@ -215,6 +215,7 @@ public class ChangeStreamDataCapture {
             }
 
             for (int cursor=resumeToken; cursor<input.length; cursor++) {
+                // de-duplication
                 if (!processed.containsKey(input[cursor])) {
                     processed.put(input[cursor], "PROCESSING");
                     if (debug) System.out.println(currentThreadId + ", processing: " + input[cursor]);
@@ -228,14 +229,11 @@ public class ChangeStreamDataCapture {
                     // simulate lengthy I/O
                     try {
                         CompletableFuture.supplyAsync(() -> {
-//                            try {
-                                // use busy wait to provide fine-grained
-                                // control of waiting time to milliseconds
-                                //Thread.sleep(messageWaitTimeInMillis);
-                                long startTime = System.nanoTime();
-                                while (System.nanoTime() - startTime <= messageWaitTimeInNanos) {}
-
-//                            } catch (InterruptedException ignored) {}
+                            // use busy wait to provide fine-grained
+                            // control of waiting time to milliseconds
+                            //Thread.sleep(messageWaitTimeInMillis);
+                            long startTime = System.nanoTime();
+                            while (System.nanoTime() - startTime <= messageWaitTimeInNanos) {}
                             return null;
                         }).get();
                     } catch (InterruptedException | ExecutionException ignored) {}
