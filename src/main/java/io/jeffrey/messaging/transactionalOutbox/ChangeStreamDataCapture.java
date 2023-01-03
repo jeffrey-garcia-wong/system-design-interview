@@ -34,8 +34,9 @@ import java.util.concurrent.ExecutionException;
  * To avoid duplicate processing, we need to keep track of all
  * processed message, a hash table which record the state of each
  * message is required, the space complexity of this would be O(M)
- * where M is the total number of messages, while read/write of the
- * hash table incurs a time complexity of O(1).<p/>
+ * where M is the total number of messages, while each node needs
+ * to process M messages and the read/write of the hash table is
+ * an O(1) operation, a total time complexity of O(M) is expected.<p/>
  *
  * To be able to resume processing of message from previous crash,
  * we need to keep track of the last processed message of each
@@ -64,27 +65,30 @@ import java.util.concurrent.ExecutionException;
  * </pre>
  *
  * Next we examine the minimum value of elapsed time, this information
- * helps to decide where the newly spawned service (scale-out scenario)
+ * helps to decide where the newly spawned node (scale-out scenario)
  * should start picking up message such that to avoid re-processing
  * the entire outbox. To search the resumption point, a scanning
  * of all the values in the workers hashtable is required, the additional
- * lookup incurs a constant search time of O(1), therefore the time
- * complexity is O(N) where N is the number of nodes, space complexity
- * is O(N).
+ * lookup incurs a constant search time of O(1), assume there is
+ * only single node, this searching is a constant time operation.
  * <p/>
  *
  * <h3>Overall time complexity</h3>
  * <pre>
  * {@code
- * O(N * N) because there is N number of nodes which performs
- * the search on N nodes
+ * Overall time complexity is O(M) *O(N) since this is the minimal
+ * unit of work each node must do, when N = 1 (single node), the time
+ * complexity is O(M) which depends on the number of messages.
+ * If we think of number of nodes is fixed in a cloud environment,
+ * the linear time complexity can always be held.
  * }
  * </pre>
  *
  * <h3>Overall space complexity</h3>
  * <pre>
  * {@code
- * O(M + N) because there are 2 hash tables of size M and N
+ * O(M + N) because there are 2 hash tables of size M and N, this
+ * remains the same no matter how many running nodes.
  * }
  * </pre>
  */
@@ -95,7 +99,7 @@ public class ChangeStreamDataCapture {
         private final int[] input;
         private final ConcurrentMap<Integer, String> processed;
         private final ConcurrentMap<String, Object[]> workers;
-        private final int messageWaitTimeInMillis;
+        private final long messageWaitTimeInNanos;
         private final boolean debug;
         private final int crashAndRollback;
 
@@ -104,7 +108,7 @@ public class ChangeStreamDataCapture {
             private int[] input;
             private ConcurrentMap<Integer, String> processed;
             private ConcurrentMap<String, Object[]> workers;
-            private int messageWaitTimeInMillis;
+            private long messageWaitTimeInNanos;
             private boolean debug = false;
             private int crashAndRollback = -1;
 
@@ -125,14 +129,14 @@ public class ChangeStreamDataCapture {
                 this.workers = workers;
                 return this;
             }
-            public Builder messageWaitTime(int waitTimeInMillis) {
+            public Builder messageWaitTime(long waitTimeInNanos) {
                 // the wait time simulate the I/O latency,
                 // should not be less than zero
-                if (waitTimeInMillis <= 0) {
-                    System.err.println("wait time must be at least 1 millisecond, resetting to 1");
-                    waitTimeInMillis = 1;
+                if (waitTimeInNanos <= 0) {
+                    System.err.println("wait time should be larger than zero, default to 1 millisecond");
+                    waitTimeInNanos = 1000000L;
                 }
-                this.messageWaitTimeInMillis = waitTimeInMillis;
+                this.messageWaitTimeInNanos = waitTimeInNanos;
                 return this;
             }
             public Builder crashAndRollback(int crashAndRollback) {
@@ -157,7 +161,7 @@ public class ChangeStreamDataCapture {
             this.input = builder.input;
             this.processed = builder.processed;
             this.workers = builder.workers;
-            this.messageWaitTimeInMillis = builder.messageWaitTimeInMillis;
+            this.messageWaitTimeInNanos = builder.messageWaitTimeInNanos;
             this.debug = builder.debug;
             this.crashAndRollback = builder.crashAndRollback;
         }
@@ -224,9 +228,14 @@ public class ChangeStreamDataCapture {
                     // simulate lengthy I/O
                     try {
                         CompletableFuture.supplyAsync(() -> {
-                            try {
-                                Thread.sleep(messageWaitTimeInMillis);
-                            } catch (InterruptedException ignored) {}
+//                            try {
+                                // use busy wait to provide fine-grained
+                                // control of waiting time to milliseconds
+                                //Thread.sleep(messageWaitTimeInMillis);
+                                long startTime = System.nanoTime();
+                                while (System.nanoTime() - startTime <= messageWaitTimeInNanos) {}
+
+//                            } catch (InterruptedException ignored) {}
                             return null;
                         }).get();
                     } catch (InterruptedException | ExecutionException ignored) {}

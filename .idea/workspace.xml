@@ -39,16 +39,17 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "last_opened_file_path": "/Users/jeffreygarcia/GIT/java/System-Design-Interview"
+    "last_opened_file_path": "/Users/jeffreygarcia/GIT/java/System-Design-Interview/src/test/resources"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/test/resources" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests.test_003">
-    <configuration name="ChangeStreamDataCaptureTests.test_003" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests">
+    <configuration name="ChangeStreamDataCaptureTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
         <pattern>
@@ -58,7 +59,54 @@
       </extension>
       <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
       <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_003" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ChangeStreamDataCaptureTests.test_001_bulkMessages" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="System-Design-Interview" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.jeffrey.messaging.transactionalOutbox.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
+      <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
+      <option name="METHOD_NAME" value="test_001_bulkMessages" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ChangeStreamDataCaptureTests.test_001_bulkMessages_bulkNodes" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="System-Design-Interview" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.jeffrey.messaging.transactionalOutbox.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
+      <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
+      <option name="METHOD_NAME" value="test_001_bulkMessages_bulkNodes" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ChangeStreamDataCaptureTests.test_004" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="System-Design-Interview" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.jeffrey.messaging.transactionalOutbox.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
+      <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
+      <option name="METHOD_NAME" value="test_004" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -80,61 +128,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_006" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="System-Design-Interview" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="io.jeffrey.messaging.transactionalOutbox.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
-      <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_006" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_007" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="System-Design-Interview" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="io.jeffrey.messaging.transactionalOutbox.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
-      <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_007" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_008" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="System-Design-Interview" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="io.jeffrey.messaging.transactionalOutbox.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
-      <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_008" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_003" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_006" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_007" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_004" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001_bulkMessages" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_008" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001_bulkMessages_bulkNodes" />
       </list>
     </recent_temporary>
   </component>
