@@ -4,8 +4,72 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
+/**
+ * <h2>Algorithms Design:</h2><hr/>
+ * Since the transactional outbox implementation will be embedded
+ * into service which runs an arbitrary number of nodes in cloud,
+ * the solution must fulfill the following requirements:
+ * <ul>
+ *     <li>
+ *         able to resume processing of message from previous crash
+ *     </li>
+ *     <li>
+ *         avoid duplicate processing of messages that has already
+ *         been processed
+ *     </li>
+ *     <li>
+ *         in a scale-out scenario, newly spawned instances should
+ *         process messages after the recently processed message,
+ *         avoid re-processing the entire outbox
+ *     </li>
+ *     <li>
+ *         in a scale-in scenario, remaining instances should be
+ *         able to pick up messages from where the terminated service
+ *         left off.
+ *     </li>
+ * </ul>
+ *
+ * <h2>Performance:</h2><hr/>
+ * To avoid duplicate processing, we need to keep track of all
+ * processed message, a hash table which record the state of each
+ * message is required, the space complexity of this would be O(M)
+ * where M is the total number of messages, while read/write of the
+ * hash table incurs a time complexity of O(1).<p/>
+ *
+ * To be able to resume processing of message from previous crash,
+ * we need to keep track of the last processed message of each
+ * running nodes (workers), a hash table is required for every
+ * node, which records the latest processed message identifier
+ * with the execution timestamp.<p/>
+ *
+ * Timestamp is essential since it's an important clue indicating
+ * that a node is possibly down when the difference of the timestamp
+ * with current time is larger than the average time to process a
+ * message. Although it could also be the fact that there isn't any
+ * new incoming message, we can still rely on this information
+ * to decide where the newly spawned service (scale-out scenario)
+ * start picking up message such that to avoid re-processing
+ * the entire outbox. To search the resumption point, a scanning
+ * of all the values in the hashtable is required, time complexity
+ * is O(N) where N is the number of nodes, space complexity is O(N).
+ * <p/>
+ *
+ * <h3>Overall time complexity</h3>
+ * <pre>
+ * {@code
+ * O(N * N) because there is N number of nodes which performs
+ * the search on N nodes
+ * }
+ * </pre>
+ *
+ * <h3>Overall space complexity</h3>
+ * <pre>
+ * {@code
+ * O(M + N) because there are 2 hash tables of size M and N
+ * }
+ * </pre>
+ */
 public class ChangeStreamDataCapture {
 
     protected static class ChangeStreamTask implements Runnable {
@@ -13,8 +77,8 @@ public class ChangeStreamDataCapture {
         private final int[] input;
         private final ConcurrentMap<Integer, String> processed;
         private final ConcurrentMap<String, Object[]> workers;
-        private int messageWaitTimeInMillis;
-        private boolean debug;
+        private final int messageWaitTimeInMillis;
+        private final boolean debug;
         private final int crashAndRollback;
 
         protected static class Builder {
@@ -48,6 +112,10 @@ public class ChangeStreamDataCapture {
                 return this;
             }
             public Builder crashAndRollback(int crashAndRollback) {
+                // the crash point is not guaranteed to happen at the
+                // specified position due to threads competition, instead
+                // it is expected the crash should happen when the cursor
+                // is equal or larger than the specified position.
                 this.crashAndRollback = crashAndRollback;
                 return this;
             }
@@ -140,7 +208,7 @@ public class ChangeStreamDataCapture {
                     processed.put(input[cursor], "COMPLETED");
                 }
                 // update resume token timestamp and threadId
-                Object[] state = workers.getOrDefault(threadId, new Object[]{ resumeToken, System.nanoTime() });
+                Object[] state = workers.getOrDefault(threadId, new Object[] { resumeToken, System.nanoTime() });
                 state[0] = (int)state[0] + 1;
                 state[1] = System.nanoTime();
                 workers.remove(threadId);
