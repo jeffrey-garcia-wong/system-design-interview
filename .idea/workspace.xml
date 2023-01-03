@@ -47,8 +47,8 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests.test_007">
-    <configuration name="ChangeStreamDataCaptureTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests.test_003">
+    <configuration name="ChangeStreamDataCaptureTests.test_003" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
         <pattern>
@@ -58,7 +58,8 @@
       </extension>
       <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
       <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="TEST_OBJECT" value="class" />
+      <option name="METHOD_NAME" value="test_003" />
+      <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -129,11 +130,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_007" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_008" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_003" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_006" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_007" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_008" />
       </list>
     </recent_temporary>
   </component>
@@ -158,5 +159,12 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="JUnit">
+        <watch expression="currentTime" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

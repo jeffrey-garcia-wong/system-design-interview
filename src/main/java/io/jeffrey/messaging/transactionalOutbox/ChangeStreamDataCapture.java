@@ -41,18 +41,36 @@ import java.util.concurrent.ExecutionException;
  * we need to keep track of the last processed message of each
  * running nodes (workers), a hash table is required for every
  * node, which records the latest processed message identifier
- * with the execution timestamp.<p/>
+ * and its execution timestamp.<p/>
  *
  * Timestamp is essential since it's an important clue indicating
- * that a node is possibly down when the difference of the timestamp
- * with current time is larger than the average time to process a
- * message. Although it could also be the fact that there isn't any
- * new incoming message, we can still rely on this information
- * to decide where the newly spawned service (scale-out scenario)
- * start picking up message such that to avoid re-processing
+ * that a node is possibly down by computing the difference of
+ * every timestamp with current timestamp (elapsed time). We first
+ * examine the maximum value, which is the worker with oldest
+ * execution timestamp, next we perform an additional lookup into
+ * the hash table of processed messages using the corresponding
+ * message identifier.<p/>
+ *
+ * If the message cannot be found, the message was left off from
+ * another node which was terminated, and must be pick up by the
+ * newly spawned node.
+ * <pre>
+ * {@code
+ * This additional lookup guard against the scenario when there
+ * is no new message to be processed and new node is spawned to
+ * replace old node terminated by normal cluster maintenance
+ * activity.
+ * }
+ * </pre>
+ *
+ * Next we examine the minimum value of elapsed time, this information
+ * helps to decide where the newly spawned service (scale-out scenario)
+ * should start picking up message such that to avoid re-processing
  * the entire outbox. To search the resumption point, a scanning
- * of all the values in the hashtable is required, time complexity
- * is O(N) where N is the number of nodes, space complexity is O(N).
+ * of all the values in the workers hashtable is required, the additional
+ * lookup incurs a constant search time of O(1), therefore the time
+ * complexity is O(N) where N is the number of nodes, space complexity
+ * is O(N).
  * <p/>
  *
  * <h3>Overall time complexity</h3>
@@ -145,17 +163,20 @@ public class ChangeStreamDataCapture {
             final long currentTime = System.nanoTime();
             long minElapsed = 0;
             long maxElapsed = 0;
-            String threadId = null;
+            String resumeThreadId = null;
             int maxResumeToken = 0;
             int minResumeToken = 0;
             if (debug) System.out.println(currentThreadId + ", available workers: " + workers.keySet());
             for (Map.Entry<String, Object[]> entry : workers.entrySet()) {
                 Object[] state = entry.getValue();
                 long elapsed = currentTime - (long)state[1];
-                if (elapsed > (long)messageWaitTimeInMillis * 1000000000L && elapsed > maxElapsed) {
-                    maxResumeToken = (int) state[0];
-                    threadId = entry.getKey();
-                    maxElapsed = elapsed;
+                if (maxElapsed == 0 || elapsed > maxElapsed) {
+                    // only resume token that was completed is persisted in the event store
+                    if (!processed.containsKey(input[(int) state[0]])) {
+                        maxResumeToken = (int) state[0];
+                        resumeThreadId = entry.getKey();
+                        maxElapsed = elapsed;
+                    }
                 }
                 if (minElapsed == 0 || elapsed < minElapsed) {
                     minResumeToken = (int) state[0];
@@ -163,9 +184,9 @@ public class ChangeStreamDataCapture {
                 }
             }
             Object[] result = new Object[3];
-            result[0] = threadId == null ? minResumeToken : maxResumeToken;
-            result[1] = threadId;
-            result[2] = threadId == null ? minElapsed : maxElapsed;
+            result[0] = resumeThreadId == null ? minResumeToken : maxResumeToken;
+            result[1] = resumeThreadId;
+            result[2] = resumeThreadId == null ? minElapsed : maxElapsed;
 
             this.initResult = result;
             return new Object[] { result[0], result[1], result[2] };
