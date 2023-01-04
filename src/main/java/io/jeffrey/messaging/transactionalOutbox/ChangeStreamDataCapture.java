@@ -147,8 +147,8 @@ public class ChangeStreamDataCapture {
                 this.crashAndRollback = crashAndRollback;
                 return this;
             }
-            public Builder debug() {
-                this.debug = true;
+            public Builder debug(boolean debug) {
+                this.debug = debug;
                 return this;
             }
             public ChangeStreamTask create() {
@@ -177,22 +177,35 @@ public class ChangeStreamDataCapture {
             int maxResumeToken = 0;
             int minResumeToken = 0;
             if (debug) System.out.println(currentThreadId + ", available workers: " + workers.keySet());
+            // TODO
             for (Map.Entry<String, Object[]> entry : workers.entrySet()) {
-                Object[] state = entry.getValue();
-                long elapsed = currentTime - (long)state[1];
-                if (maxElapsed == 0 || elapsed > maxElapsed) {
-                    // only resume token that was completed is persisted in the event store
-                    if (!processed.containsKey(input[(int) state[0]])) {
-                        maxResumeToken = (int) state[0];
-                        resumeThreadId = entry.getKey();
-                        maxElapsed = elapsed;
+                try {
+                    Object[] state = entry.getValue();
+                    int lastResumeToken = (int) state[0];
+                    long lastElapsedTime = currentTime - (long)state[1];
+                    if (lastResumeToken >= input.length) {
+                        // worker has processed all the input
+                        minResumeToken = (int) state[0];
+                        minElapsed = lastElapsedTime;
+                        break;
                     }
-                }
-                if (minElapsed == 0 || elapsed < minElapsed) {
-                    minResumeToken = (int) state[0];
-                    minElapsed = elapsed;
+                    if (maxElapsed == 0 || lastElapsedTime > maxElapsed) {
+                        // only resume token that was completed is persisted in the event store
+                        if (!processed.containsKey(input[(int) state[0]])) {
+                            maxResumeToken = (int) state[0];
+                            resumeThreadId = entry.getKey();
+                            maxElapsed = lastElapsedTime;
+                        }
+                    }
+                    if (minElapsed == 0 || lastElapsedTime < minElapsed) {
+                        minResumeToken = (int) state[0];
+                        minElapsed = lastElapsedTime;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
+
             Object[] result = new Object[3];
             result[0] = resumeThreadId == null ? minResumeToken : maxResumeToken;
             result[1] = resumeThreadId;
@@ -228,26 +241,37 @@ public class ChangeStreamDataCapture {
 
                     // simulate lengthy I/O
                     try {
-                        CompletableFuture.supplyAsync(() -> {
-                            // use busy wait to provide fine-grained
-                            // control of waiting time to milliseconds
-                            //Thread.sleep(messageWaitTimeInMillis);
+//                        CompletableFuture.supplyAsync(() -> {
+//                            // use busy wait to provide fine-grained
+//                            // control of waiting time to milliseconds
+//                            //Thread.sleep(messageWaitTimeInMillis);
                             long startTime = System.nanoTime();
-                            while (System.nanoTime() - startTime <= messageWaitTimeInNanos) {}
-                            return null;
-                        }).get();
-                    } catch (InterruptedException | ExecutionException ignored) {}
+                            while (System.nanoTime() - startTime <= messageWaitTimeInNanos) {
+                                Thread.sleep(1);
+                            }
+//                            return null;
+//                        }).get();
+                    } catch (InterruptedException ignored) {}
 
                     // commit
                     processed.put(input[cursor], "COMPLETED");
                 }
+
+                // ensure immutability
+                Object[] newState;
+                if (workers.containsKey(threadId)) {
+                    Object[] state = workers.get(threadId);
+                    newState = new Object[] {(int) state[0], (long)state[1] };
+                } else {
+                    newState = new Object[] { resumeToken, System.nanoTime() };
+                }
                 // update resume token timestamp and threadId
-                Object[] state = workers.getOrDefault(threadId, new Object[] { resumeToken, System.nanoTime() });
-                state[0] = (int)state[0] + 1;
-                state[1] = System.nanoTime();
-                workers.remove(threadId);
-                threadId = currentThreadId;
-                workers.put(threadId, state);
+                newState[0] = cursor + 1;
+                newState[1] = System.nanoTime();
+                if (!threadId.equals(currentThreadId)) {
+                    threadId = currentThreadId;
+                }
+                workers.put(threadId, newState);
             }
         }
     }

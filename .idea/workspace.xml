@@ -34,21 +34,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "last_opened_file_path": "/Users/jeffreygarcia/GIT/java/System-Design-Interview/src/test/resources"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/jeffreygarcia/GIT/java/System-Design-Interview/src/test/resources&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/test/resources" />
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests">
+  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests.test_005">
     <configuration name="ChangeStreamDataCaptureTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
@@ -64,7 +64,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_001_bulkMessages_maxCores" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="ChangeStreamDataCaptureTests.test_003_repeat" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
         <pattern>
@@ -74,23 +74,7 @@
       </extension>
       <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
       <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_001_bulkMessages_maxCores" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_002" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="System-Design-Interview" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="io.jeffrey.messaging.transactionalOutbox.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
-      <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_002" />
+      <option name="METHOD_NAME" value="test_003_repeat" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -128,13 +112,29 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="ChangeStreamDataCaptureTests.test_005_repeat" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="System-Design-Interview" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.jeffrey.messaging.transactionalOutbox.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
+      <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
+      <option name="METHOD_NAME" value="test_005_repeat" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001_bulkMessages_maxCores" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_002" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005_repeat" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_004" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_003_repeat" />
       </list>
     </recent_temporary>
   </component>
