@@ -240,18 +240,16 @@ public class ChangeStreamDataCapture {
                     }
 
                     // simulate lengthy I/O
-                    try {
+//                    try {
 //                        CompletableFuture.supplyAsync(() -> {
 //                            // use busy wait to provide fine-grained
 //                            // control of waiting time to milliseconds
-//                            //Thread.sleep(messageWaitTimeInMillis);
                             long startTime = System.nanoTime();
                             while (System.nanoTime() - startTime <= messageWaitTimeInNanos) {
-                                Thread.sleep(1);
                             }
 //                            return null;
 //                        }).get();
-                    } catch (InterruptedException ignored) {}
+//                    } catch (InterruptedException ignored) {}
 
                     // commit
                     processed.put(input[cursor], "COMPLETED");

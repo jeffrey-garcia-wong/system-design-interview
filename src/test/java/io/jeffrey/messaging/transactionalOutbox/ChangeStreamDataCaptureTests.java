@@ -27,8 +27,8 @@ public class ChangeStreamDataCaptureTests {
     @Timeout(1)
     public void test_001() throws InterruptedException {
         final int MAX_THREAD_COUNT = 2;
-        final int MESSAGES_COUNT = 10;
-        final long IO_WAIT_TIME_IN_NANOS = 10000000L;
+        final int MESSAGES_COUNT = 100;
+        final long IO_WAIT_TIME_IN_NANOS = 10L;
         final int[] MESSAGES = new int [MESSAGES_COUNT];
         for (int i=0; i<MESSAGES.length; i++) {
             MESSAGES[i] = i+1;
@@ -41,7 +41,7 @@ public class ChangeStreamDataCaptureTests {
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
 
         for (int i=0; i<MAX_THREAD_COUNT; i++) {
-            final int id = i;
+            final int id = i + 1;
             executorService.execute(() -> {
                 final String currentThreadId = "Thread-" + (id);
                 ChangeStreamDataCapture.ChangeStreamTask thread2 =
@@ -74,7 +74,23 @@ public class ChangeStreamDataCaptureTests {
             assertEquals("COMPLETED", processed.get(MESSAGES[i]));
         }
 
-        assertEquals(MAX_THREAD_COUNT, workers.size());
+        /*
+         * By time when thread 2 spawned, there are few
+         * possible outcomes:
+         * - thread 1 and 2 finish all the messages
+         * - thread 1 finish process all messages. so thread 2
+         *   ended-up not processing any message
+         * - thread 2 finish process all messages. so thread 1
+         *   ended-up not processing any message
+         */
+        if (workers.size() == 1) {
+            assertTrue(workers.containsKey("Thread-1") || workers.containsKey("Thread-2"));
+        } else if (workers.size() == 2) {
+            assertTrue(workers.containsKey("Thread-1"));
+            assertTrue(workers.containsKey("Thread-2"));
+        } else {
+            fail("invalid workers size: " + workers.size());
+        }
         for (Map.Entry<String, Object[]> entry : workers.entrySet()) {
             Object[] state = entry.getValue();
             int resumeToken = (int)state[0];
@@ -109,7 +125,7 @@ public class ChangeStreamDataCaptureTests {
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
 
         for (int i=0; i<MAX_THREAD_COUNT; i++) {
-            final int id = i;
+            final int id = i + 1;
             executorService.execute(() -> {
                 final String currentThreadId = "Thread-" + (id);
                 ChangeStreamDataCapture.ChangeStreamTask thread =
@@ -480,7 +496,9 @@ public class ChangeStreamDataCaptureTests {
          * - thread 1 finish process all messages, so thread 3
          *   ended-up not processing any message
          */
-        if (workers.size() == 2) {
+        if (workers.size() == 1) {
+            assertTrue(workers.containsKey("Thread-1"));
+        } else if (workers.size() == 2) {
             // Thread 3 pickup Thread 2
             assertTrue(workers.containsKey("Thread-1"));
             assertTrue(workers.containsKey("Thread-3") || workers.containsKey("Thread-2"));
@@ -524,7 +542,7 @@ public class ChangeStreamDataCaptureTests {
     public void test_005() throws InterruptedException {
         final int MAX_THREAD_COUNT = 3;
         final int MESSAGES_COUNT = 100;
-        final long IO_WAIT_TIME_IN_NANOS = 1000L;
+        final long IO_WAIT_TIME_IN_NANOS = 10L;
         final int[] MESSAGES = new int [MESSAGES_COUNT];
         for (int i=0; i<MESSAGES.length; i++) {
             MESSAGES[i] = i+1;
@@ -621,8 +639,11 @@ public class ChangeStreamDataCaptureTests {
         if (workers.size() == 1) {
             assertTrue(workers.containsKey("Thread-1") || workers.containsKey("Thread-2"));
         } else if (workers.size() == 2) {
-            assertTrue(workers.containsKey("Thread-1"));
-            assertTrue(workers.containsKey("Thread-2"));
+            assertTrue(
+        (workers.containsKey("Thread-1") && workers.containsKey("Thread-2")) ||
+                (workers.containsKey("Thread-2") && workers.containsKey("Thread-3")) ||
+                (workers.containsKey("Thread-1") && workers.containsKey("Thread-3"))
+            );
         } else if (workers.size() == 3) {
             assertTrue(workers.containsKey("Thread-1"));
             assertTrue(workers.containsKey("Thread-2"));
@@ -638,7 +659,7 @@ public class ChangeStreamDataCaptureTests {
         }
     }
 
-    @Execution(ExecutionMode.SAME_THREAD)
+    @Execution(ExecutionMode.CONCURRENT)
     @RepeatedTest(1000)
     public void test_005_repeat() throws InterruptedException {
         test_005();

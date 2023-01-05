@@ -48,7 +48,7 @@
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
-  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests.test_005">
+  <component name="RunManager" selected="JUnit.ChangeStreamDataCaptureTests">
     <configuration name="ChangeStreamDataCaptureTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
@@ -64,7 +64,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_003_repeat" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="ChangeStreamDataCaptureTests.test_001" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
         <pattern>
@@ -74,13 +74,13 @@
       </extension>
       <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
       <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_003_repeat" />
+      <option name="METHOD_NAME" value="test_001" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_004" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="ChangeStreamDataCaptureTests.test_001_bulkMessages_maxCores" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
         <pattern>
@@ -90,13 +90,13 @@
       </extension>
       <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
       <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_004" />
+      <option name="METHOD_NAME" value="test_001_bulkMessages_maxCores" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ChangeStreamDataCaptureTests.test_005" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="ChangeStreamDataCaptureTests.test_001_repeat" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="System-Design-Interview" />
       <extension name="coverage">
         <pattern>
@@ -106,7 +106,7 @@
       </extension>
       <option name="PACKAGE_NAME" value="io.jeffrey.messaging.transactionalOutbox" />
       <option name="MAIN_CLASS_NAME" value="io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCaptureTests" />
-      <option name="METHOD_NAME" value="test_005" />
+      <option name="METHOD_NAME" value="test_001_repeat" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -130,11 +130,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005_repeat" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_004" />
         <item itemvalue="JUnit.ChangeStreamDataCaptureTests" />
-        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_003_repeat" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_005_repeat" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001_repeat" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001_bulkMessages_maxCores" />
+        <item itemvalue="JUnit.ChangeStreamDataCaptureTests.test_001" />
       </list>
     </recent_temporary>
   </component>
@@ -161,10 +161,27 @@
     </option>
   </component>
   <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/test/java/io/jeffrey/messaging/transactionalOutbox/ChangeStreamDataCaptureTests.java</url>
+          <line>510</line>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
     <watches-manager>
       <configuration name="JUnit">
         <watch expression="currentTime" />
       </configuration>
     </watches-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/System_Design_Interview$ChangeStreamDataCaptureTests.ic" NAME="ChangeStreamDataCaptureTests Coverage Results" MODIFIED="1672863162268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>io.jeffrey.messaging.transactionalOutbox.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/System_Design_Interview$ChangeStreamDataCaptureTests_test_005.ic" NAME="ChangeStreamDataCaptureTests.test_005 Coverage Results" MODIFIED="1672861807651" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+      <FILTER>io.jeffrey.messaging.transactionalOutbox.*</FILTER>
+    </SUITE>
   </component>
 </project>
