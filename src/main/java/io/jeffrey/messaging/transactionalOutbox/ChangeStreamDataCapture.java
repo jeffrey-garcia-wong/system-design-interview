@@ -1,9 +1,9 @@
 package io.jeffrey.messaging.transactionalOutbox;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
 
 /**
  * <h2>Algorithms Design:</h2><hr/>
@@ -94,7 +94,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class ChangeStreamDataCapture {
 
-    protected static class ChangeStreamTask implements Runnable {
+    protected static class ChangeStreamTask implements Callable<Void> {
         private final String currentThreadId;
         private final int[] input;
         private final ConcurrentMap<Integer, String> processed;
@@ -177,7 +177,6 @@ public class ChangeStreamDataCapture {
             int maxResumeToken = 0;
             int minResumeToken = 0;
             if (debug) System.out.println(currentThreadId + ", available workers: " + workers.keySet());
-            // TODO
             for (Map.Entry<String, Object[]> entry : workers.entrySet()) {
                 try {
                     Object[] state = entry.getValue();
@@ -216,7 +215,8 @@ public class ChangeStreamDataCapture {
         }
 
         @Override
-        public void run() {
+        public Void call() throws Exception {
+            Object[] initResult = lookupResumeToken(this.currentThreadId);
             int resumeToken = (int) initResult[0];
             String threadId = (String) initResult[1];
 
@@ -241,14 +241,14 @@ public class ChangeStreamDataCapture {
 
                     // simulate lengthy I/O
 //                    try {
-//                        CompletableFuture.supplyAsync(() -> {
-//                            // use busy wait to provide fine-grained
-//                            // control of waiting time to milliseconds
+                        CompletableFuture.supplyAsync(() -> {
+                            // use busy wait to provide fine-grained
+                            // control of waiting time to milliseconds
                             long startTime = System.nanoTime();
                             while (System.nanoTime() - startTime <= messageWaitTimeInNanos) {
                             }
-//                            return null;
-//                        }).get();
+                            return null;
+                        }).get();
 //                    } catch (InterruptedException ignored) {}
 
                     // commit
@@ -271,6 +271,8 @@ public class ChangeStreamDataCapture {
                 }
                 workers.put(threadId, newState);
             }
+
+            return null;
         }
     }
 

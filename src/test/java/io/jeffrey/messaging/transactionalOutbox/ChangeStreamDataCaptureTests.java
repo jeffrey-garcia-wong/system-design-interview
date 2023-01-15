@@ -7,9 +7,13 @@ import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
+import static io.jeffrey.messaging.transactionalOutbox.ChangeStreamDataCapture.ChangeStreamTask;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ChangeStreamDataCaptureTests {
@@ -25,7 +29,7 @@ public class ChangeStreamDataCaptureTests {
     @Test
     @Execution(ExecutionMode.CONCURRENT)
     @Timeout(1)
-    public void test_001() throws InterruptedException {
+    public void test_001() throws Exception {
         final int MAX_THREAD_COUNT = 2;
         final int MESSAGES_COUNT = 100;
         final long IO_WAIT_TIME_IN_NANOS = 10L;
@@ -36,33 +40,30 @@ public class ChangeStreamDataCaptureTests {
         final boolean DEBUG = false;
 
         final ConcurrentMap<Integer, String> processed = new ConcurrentHashMap<>();
-        final CountDownLatch latch = new CountDownLatch(MAX_THREAD_COUNT);
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_THREAD_COUNT);
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
+        final List<Callable<Void>> callables = new LinkedList<>();
 
         for (int i=0; i<MAX_THREAD_COUNT; i++) {
             final int id = i + 1;
-            executorService.execute(() -> {
-                final String currentThreadId = "Thread-" + (id);
-                ChangeStreamDataCapture.ChangeStreamTask thread2 =
-                        new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                                .threadId(currentThreadId)
-                                .outbox(MESSAGES)
-                                .eventStore(processed)
-                                .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                                .workersState(workers)
-                                .debug(DEBUG)
-                                .create();
-
-                @SuppressWarnings("unused")
-                Object[] result = thread2.lookupResumeToken(currentThreadId);
-
-                thread2.run();
-                latch.countDown();
-            });
+            final String currentThreadId = "Thread-" + (id);
+            ChangeStreamTask callable =
+                    new ChangeStreamTask.Builder()
+                            .threadId(currentThreadId)
+                            .outbox(MESSAGES)
+                            .eventStore(processed)
+                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                            .workersState(workers)
+                            .debug(DEBUG)
+                            .create();
+            callables.add(callable);
         }
 
-        latch.await();
+        Collection<Future<Void>> futures = executorService.invokeAll(callables);
+        for (Future<Void> future : futures) {
+            future.get();
+        }
+
         executorService.shutdown();
         while (!executorService.isTerminated()) {
             Thread.sleep(1);
@@ -101,14 +102,14 @@ public class ChangeStreamDataCaptureTests {
 
     @Execution(ExecutionMode.CONCURRENT)
     @RepeatedTest(1000)
-    public void test_001_repeat() throws InterruptedException {
+    public void test_001_repeat() throws Exception {
         test_001();
     }
 
     @Test
     @Execution(ExecutionMode.CONCURRENT)
     @Timeout(10)
-    public void test_001_bulkMessages_maxCores() throws InterruptedException {
+    public void test_001_bulkMessages_maxCores() throws Exception {
         final int CPU_CORES = Runtime.getRuntime().availableProcessors() - 2;
         final int MAX_THREAD_COUNT = CPU_CORES;
         final int MESSAGES_COUNT = 100000;
@@ -120,33 +121,30 @@ public class ChangeStreamDataCaptureTests {
         final boolean DEBUG = false;
 
         final ConcurrentMap<Integer, String> processed = new ConcurrentHashMap<>();
-        final CountDownLatch latch = new CountDownLatch(MAX_THREAD_COUNT);
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_THREAD_COUNT);
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
+        final List<Callable<Void>> callables = new LinkedList<>();
 
         for (int i=0; i<MAX_THREAD_COUNT; i++) {
             final int id = i + 1;
-            executorService.execute(() -> {
-                final String currentThreadId = "Thread-" + (id);
-                ChangeStreamDataCapture.ChangeStreamTask thread =
-                        new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                                .threadId(currentThreadId)
-                                .outbox(MESSAGES)
-                                .eventStore(processed)
-                                .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                                .workersState(workers)
-                                .debug(DEBUG)
-                                .create();
-
-                @SuppressWarnings("unused")
-                Object[] result = thread.lookupResumeToken(currentThreadId);
-
-                thread.run();
-                latch.countDown();
-            });
+            final String currentThreadId = "Thread-" + (id);
+            ChangeStreamTask callable =
+                    new ChangeStreamTask.Builder()
+                            .threadId(currentThreadId)
+                            .outbox(MESSAGES)
+                            .eventStore(processed)
+                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                            .workersState(workers)
+                            .debug(DEBUG)
+                            .create();
+            callables.add(callable);
         }
 
-        latch.await();
+        Collection<Future<Void>> futures = executorService.invokeAll(callables);
+        for (Future<Void> future : futures) {
+            future.get();
+        }
+
         executorService.shutdown();
         while (!executorService.isTerminated()) {
             Thread.sleep(1);
@@ -174,7 +172,7 @@ public class ChangeStreamDataCaptureTests {
      */
     @Test
     @Timeout(1)
-    public void test_002() throws InterruptedException {
+    public void test_002() throws Exception {
         final int MAX_THREAD_COUNT = 1;
         final int MESSAGES_COUNT = 10;
         final int IO_WAIT_TIME_IN_MILLIS = 10;
@@ -186,54 +184,32 @@ public class ChangeStreamDataCaptureTests {
         final boolean DEBUG = false;
 
         final ConcurrentMap<Integer, String> processed = new ConcurrentHashMap<>();
-        final CountDownLatch latch = new CountDownLatch(MAX_THREAD_COUNT);
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_THREAD_COUNT);
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
 
-        executorService.execute(() -> {
-            final String currentThreadId = "Thread-1";
-            ChangeStreamDataCapture.ChangeStreamTask thread1 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_MILLIS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .crashAndRollback(CRASH_MESSAGE_ID)
-                            .create();
+        executorService.submit(
+                new ChangeStreamTask.Builder()
+                        .threadId("Thread-1")
+                        .outbox(MESSAGES)
+                        .eventStore(processed)
+                        .messageWaitTime(IO_WAIT_TIME_IN_MILLIS)
+                        .workersState(workers)
+                        .debug(DEBUG)
+                        .crashAndRollback(CRASH_MESSAGE_ID)
+                        .create()
+        ).get();
 
-            @SuppressWarnings("unused")
-            Object[] result = thread1.lookupResumeToken(currentThreadId);
+        executorService.submit(
+                new ChangeStreamDataCapture.ChangeStreamTask.Builder()
+                        .threadId("Thread-2")
+                        .outbox(MESSAGES)
+                        .eventStore(processed)
+                        .messageWaitTime(IO_WAIT_TIME_IN_MILLIS)
+                        .workersState(workers)
+                        .debug(DEBUG)
+                        .create()
+        ).get();
 
-            thread1.run();
-            latch.countDown();
-        });
-
-        executorService.execute(() -> {
-            final String currentThreadId = "Thread-2";
-            ChangeStreamDataCapture.ChangeStreamTask thread2 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_MILLIS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .create();
-
-            // the crash point is not guaranteed to happen at the
-            // specified position due to threads competition, instead
-            // it is expected the crash should happen when the cursor
-            // is equal or larger than the specified position.
-            @SuppressWarnings("unused")
-            Object[] result = thread2.lookupResumeToken(currentThreadId);
-
-            thread2.run();
-            latch.countDown();
-        });
-
-        latch.await();
         executorService.shutdown();
         while (!executorService.isTerminated()) {
             Thread.sleep(1);
@@ -263,7 +239,7 @@ public class ChangeStreamDataCaptureTests {
 
     @Execution(ExecutionMode.CONCURRENT)
     @RepeatedTest(1000)
-    public void test_002_repeat() throws InterruptedException {
+    public void test_002_repeat() throws Exception {
         test_002();
     }
 
@@ -275,7 +251,7 @@ public class ChangeStreamDataCaptureTests {
     @Test
     @Execution(ExecutionMode.CONCURRENT)
     @Timeout(1)
-    public void test_003() throws InterruptedException {
+    public void test_003() throws Exception {
         final int MAX_THREAD_COUNT = 2;
         final int MESSAGES_COUNT = 10;
         final long IO_WAIT_TIME_IN_NANOS = 1000000L;
@@ -287,54 +263,38 @@ public class ChangeStreamDataCaptureTests {
         final boolean DEBUG = false;
 
         final ConcurrentMap<Integer, String> processed = new ConcurrentHashMap<>();
-        final CountDownLatch latch = new CountDownLatch(MAX_THREAD_COUNT);
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_THREAD_COUNT);
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
+        final List<Callable<Void>> callables = new LinkedList<>();
 
-        executorService.execute(() -> {
-            final String currentThreadId = "Thread-1";
-            ChangeStreamDataCapture.ChangeStreamTask thread1 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .crashAndRollback(CRASH_MESSAGE_ID)
-                            .create();
+        Future<Void> future1 = executorService.submit(
+                new ChangeStreamTask.Builder()
+                        .threadId("Thread-1")
+                        .outbox(MESSAGES)
+                        .eventStore(processed)
+                        .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                        .workersState(workers)
+                        .debug(DEBUG)
+                        .crashAndRollback(CRASH_MESSAGE_ID)
+                        .create()
+        );
 
-            @SuppressWarnings("unused")
-            Object[] result = thread1.lookupResumeToken(currentThreadId);
+        Future<Void> future2 = executorService.schedule(
+                new ChangeStreamTask.Builder()
+                        .threadId("Thread-2")
+                        .outbox(MESSAGES)
+                        .eventStore(processed)
+                        .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                        .workersState(workers)
+                        .debug(DEBUG)
+                        .create(),
+                MESSAGES_COUNT * IO_WAIT_TIME_IN_NANOS,
+                TimeUnit.NANOSECONDS
+        );
 
-            thread1.run();
-            latch.countDown();
-        });
+        future1.get();
+        future2.get();
 
-        executorService.schedule(() -> {
-            final String currentThreadId = "Thread-2";
-            ChangeStreamDataCapture.ChangeStreamTask thread2 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .create();
-
-            /*
-             * the crash point is not guaranteed to happen at the
-             * specified position due to threads competition
-             */
-            @SuppressWarnings("unused")
-            Object[] result = thread2.lookupResumeToken(currentThreadId);
-
-            thread2.run();
-            latch.countDown();
-        }, MESSAGES_COUNT * IO_WAIT_TIME_IN_NANOS, TimeUnit.NANOSECONDS);
-
-        latch.await();
         executorService.shutdown();
         while (!executorService.isTerminated()) {
             Thread.sleep(1);
@@ -379,7 +339,7 @@ public class ChangeStreamDataCaptureTests {
 
     @Execution(ExecutionMode.CONCURRENT)
     @RepeatedTest(1000)
-    public void test_003_repeat() throws InterruptedException {
+    public void test_003_repeat() throws Exception {
         test_003();
     }
 
@@ -400,7 +360,7 @@ public class ChangeStreamDataCaptureTests {
     @Test
     @Execution(ExecutionMode.CONCURRENT)
     @Timeout(2)
-    public void test_004() throws InterruptedException {
+    public void test_004() throws Exception {
         final int MAX_THREAD_COUNT = 2;
         final int MESSAGES_COUNT = 10;
         final long IO_WAIT_TIME_IN_NANOS = 1000000L;
@@ -412,70 +372,44 @@ public class ChangeStreamDataCaptureTests {
         final boolean DEBUG = false;
 
         final ConcurrentMap<Integer, String> processed = new ConcurrentHashMap<>();
-        // latch count MUST BE EQUAL to the number of workers been spawned
-        final CountDownLatch latch = new CountDownLatch(MAX_THREAD_COUNT + 1);
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_THREAD_COUNT);
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
+        final List<Callable<Void>> callables = new LinkedList<>();
 
-        executorService.execute(() -> {
-            final String currentThreadId = "Thread-1";
-            ChangeStreamDataCapture.ChangeStreamTask thread1 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .create();
+        for (int i=0; i<3; i++) {
+            final int id = i+1;
+            final String currentThreadId = "Thread-" +  id;
+            if (id==2) {
+                callables.add(
+                        new ChangeStreamTask.Builder()
+                                .threadId(currentThreadId)
+                                .outbox(MESSAGES)
+                                .eventStore(processed)
+                                .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                                .workersState(workers)
+                                .crashAndRollback(CRASH_MESSAGE_ID)
+                                .debug(DEBUG)
+                                .create()
+                );
+            } else {
+                callables.add(
+                        new ChangeStreamTask.Builder()
+                                .threadId(currentThreadId)
+                                .outbox(MESSAGES)
+                                .eventStore(processed)
+                                .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                                .workersState(workers)
+                                .debug(DEBUG)
+                                .create()
+                );
+            }
+        }
 
-            @SuppressWarnings("unused")
-            Object[] result = thread1.lookupResumeToken(currentThreadId);
+        Collection<Future<Void>> futures = executorService.invokeAll(callables);
+        for (Future<Void> future : futures) {
+            future.get();
+        }
 
-            thread1.run();
-            latch.countDown();
-        });
-
-        executorService.execute(() -> {
-            final String currentThreadId = "Thread-2";
-            ChangeStreamDataCapture.ChangeStreamTask thread2 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .crashAndRollback(CRASH_MESSAGE_ID)
-                            .create();
-
-            @SuppressWarnings("unused")
-            Object[] result = thread2.lookupResumeToken(currentThreadId);
-
-            thread2.run();
-            latch.countDown();
-        });
-
-        executorService.schedule(() -> {
-            final String currentThreadId = "Thread-3";
-            ChangeStreamDataCapture.ChangeStreamTask thread3 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .create();
-
-            @SuppressWarnings("unused")
-            Object[] result = thread3.lookupResumeToken(currentThreadId);
-
-            thread3.run();
-            latch.countDown();
-        }, (CRASH_MESSAGE_ID) * IO_WAIT_TIME_IN_NANOS, TimeUnit.NANOSECONDS);
-
-        latch.await();
         executorService.shutdown();
         while (!executorService.isTerminated()) {
             Thread.sleep(1);
@@ -527,7 +461,7 @@ public class ChangeStreamDataCaptureTests {
 
     @Execution(ExecutionMode.CONCURRENT)
     @RepeatedTest(1000)
-    public void test_004_repeat() throws InterruptedException {
+    public void test_004_repeat() throws Exception {
         test_004();
     }
 
@@ -539,7 +473,7 @@ public class ChangeStreamDataCaptureTests {
     @Test
     @Execution(ExecutionMode.CONCURRENT)
     @Timeout(1)
-    public void test_005() throws InterruptedException {
+    public void test_005() throws Exception {
         final int MAX_THREAD_COUNT = 3;
         final int MESSAGES_COUNT = 100;
         final long IO_WAIT_TIME_IN_NANOS = 10L;
@@ -550,70 +484,48 @@ public class ChangeStreamDataCaptureTests {
         final boolean DEBUG = false;
 
         final ConcurrentMap<Integer, String> processed = new ConcurrentHashMap<>();
-        final CountDownLatch latch = new CountDownLatch(MAX_THREAD_COUNT);
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(MAX_THREAD_COUNT);
         final ConcurrentMap<String, Object[]> workers = new ConcurrentHashMap<>();
 
-        executorService.schedule(() -> {
-            final String currentThreadId = "Thread-1";
-            ChangeStreamDataCapture.ChangeStreamTask thread1 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .create();
+        final Collection<Future<Void>> futures = new LinkedList<>();
+        futures.add(executorService.schedule(
+                new ChangeStreamTask.Builder()
+                        .threadId("Thread-1")
+                        .outbox(MESSAGES)
+                        .eventStore(processed)
+                        .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                        .workersState(workers)
+                        .debug(DEBUG)
+                        .create()
+                , 0, TimeUnit.NANOSECONDS));
 
-            @SuppressWarnings("unused")
-            Object[] result = thread1.lookupResumeToken(currentThreadId);
-
-            thread1.run();
-            latch.countDown();
-        }, 0, TimeUnit.MICROSECONDS);
-
-        executorService.schedule(() -> {
-            final String currentThreadId = "Thread-2";
-            ChangeStreamDataCapture.ChangeStreamTask thread2 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .create();
-
-            @SuppressWarnings("unused")
-            Object[] result = thread2.lookupResumeToken(currentThreadId);
-
-            thread2.run();
-            latch.countDown();
-        }, 0, TimeUnit.MICROSECONDS);
+        futures.add(executorService.schedule(
+                new ChangeStreamTask.Builder()
+                        .threadId("Thread-2")
+                        .outbox(MESSAGES)
+                        .eventStore(processed)
+                        .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                        .workersState(workers)
+                        .debug(DEBUG)
+                        .create()
+                , 0, TimeUnit.NANOSECONDS));
 
         // simulate scale out of the 3rd thread after some time
-        executorService.schedule(() -> {
-            final String currentThreadId = "Thread-3";
+        futures.add(executorService.schedule(
+                new ChangeStreamTask.Builder()
+                        .threadId("Thread-3")
+                        .outbox(MESSAGES)
+                        .eventStore(processed)
+                        .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
+                        .workersState(workers)
+                        .debug(DEBUG)
+                        .create()
+                , MESSAGES_COUNT*IO_WAIT_TIME_IN_NANOS, TimeUnit.NANOSECONDS));
 
-            ChangeStreamDataCapture.ChangeStreamTask thread3 =
-                    new ChangeStreamDataCapture.ChangeStreamTask.Builder()
-                            .threadId(currentThreadId)
-                            .outbox(MESSAGES)
-                            .eventStore(processed)
-                            .messageWaitTime(IO_WAIT_TIME_IN_NANOS)
-                            .workersState(workers)
-                            .debug(DEBUG)
-                            .create();
+        for (Future<Void> future : futures) {
+            future.get();
+        }
 
-            @SuppressWarnings("unused")
-            Object[] result = thread3.lookupResumeToken(currentThreadId);
-
-            thread3.run();
-            latch.countDown();
-        }, MESSAGES_COUNT*IO_WAIT_TIME_IN_NANOS/5, TimeUnit.NANOSECONDS);
-
-        latch.await();
         executorService.shutdown();
         while (!executorService.isTerminated()) {
             Thread.sleep(1);
@@ -637,7 +549,7 @@ public class ChangeStreamDataCaptureTests {
          *   and 3 ended-up not processing any message
          */
         if (workers.size() == 1) {
-            assertTrue(workers.containsKey("Thread-1") || workers.containsKey("Thread-2"));
+            assertTrue(workers.containsKey("Thread-1") || workers.containsKey("Thread-2") || workers.containsKey("Thread-3"));
         } else if (workers.size() == 2) {
             assertTrue(
         (workers.containsKey("Thread-1") && workers.containsKey("Thread-2")) ||
@@ -661,7 +573,7 @@ public class ChangeStreamDataCaptureTests {
 
     @Execution(ExecutionMode.CONCURRENT)
     @RepeatedTest(1000)
-    public void test_005_repeat() throws InterruptedException {
+    public void test_005_repeat() throws Exception {
         test_005();
     }
 
@@ -670,9 +582,121 @@ public class ChangeStreamDataCaptureTests {
      * should be able to resume left-over message from the
      * terminated service
      */
-//    @Test
-//    public void test_006() throws InterruptedException {
-//
-//    }
+    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    public void test_006() {}
 
+    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    public void test_007() throws Exception {
+        final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
+        final List<Callable<Void>> callables = new LinkedList<>();
+
+        for (int i=0; i<12; i++) {
+            callables.add(() -> {
+                System.out.println(Thread.currentThread().getName() + " start");
+                Thread.sleep(100);
+                System.out.println(Thread.currentThread().getName() + " end");
+                return null;
+            });
+        }
+
+        Collection<Future<Void>> futures = executorService.invokeAll(callables);
+        for (Future<Void> future : futures) {
+            assertTrue(future.isDone());
+        }
+
+        executorService.shutdown();
+        while (!executorService.isTerminated()) {
+            Thread.sleep(1);
+        }
+        executorService.shutdownNow();
+    }
+
+    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    public void test_008() throws Exception {
+        final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
+        Collection<Future<Void>> futures = new LinkedList<>();
+
+        futures.add(executorService.schedule(
+                (() -> {
+                    System.out.println(Thread.currentThread().getName() + " start");
+                    Thread.sleep(100);
+                    System.out.println(Thread.currentThread().getName() + " end");
+                    return null;
+                }),
+        0, TimeUnit.NANOSECONDS));
+
+        futures.add(executorService.schedule(
+                (() -> {
+                    System.out.println(Thread.currentThread().getName() + " start");
+                    Thread.sleep(100);
+                    System.out.println(Thread.currentThread().getName() + " end");
+                    return null;
+                }),
+                0, TimeUnit.NANOSECONDS));
+
+        futures.add(executorService.schedule(
+                (() -> {
+                    System.out.println(Thread.currentThread().getName() + " start");
+                    Thread.sleep(100);
+                    System.out.println(Thread.currentThread().getName() + " end");
+                    return null;
+                }),
+                100000000L, TimeUnit.NANOSECONDS));
+
+        for (Future<Void> future : futures) {
+            future.get();
+            assertTrue(future.isDone());
+        }
+
+        executorService.shutdown();
+        while (!executorService.isTerminated()) {
+            Thread.sleep(1);
+        }
+        executorService.shutdownNow();
+    }
+
+    @Test
+    @Execution(ExecutionMode.CONCURRENT)
+    public void test_009() throws Exception {
+        final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
+        Collection<Future<?>> futures = new LinkedList<>();
+
+        futures.add(executorService.submit(() -> {
+            try {
+                System.out.println(Thread.currentThread().getName() + " start");
+                Thread.sleep(100);
+                System.out.println(Thread.currentThread().getName() + " end");
+            } catch (InterruptedException ignored) {}
+        }));
+
+        futures.add(executorService.submit(() -> {
+            try {
+                System.out.println(Thread.currentThread().getName() + " start");
+                Thread.sleep(100);
+                System.out.println(Thread.currentThread().getName() + " end");
+            } catch (InterruptedException ignored) {}
+        }));
+
+        futures.add(executorService.submit(() -> {
+            try {
+                System.out.println(Thread.currentThread().getName() + " start");
+                Thread.sleep(100);
+                System.out.println(Thread.currentThread().getName() + " end");
+            } catch (InterruptedException ignored) {}
+        }));
+
+        for (Future<?> future : futures) {
+            future.get();
+            assertTrue(future.isDone());
+        }
+
+        executorService.shutdown();
+        while (!executorService.isTerminated()) {
+            Thread.sleep(1);
+        }
+        executorService.shutdownNow();
+    }
 }
