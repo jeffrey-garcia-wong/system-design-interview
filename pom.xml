@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jeffrey</groupId>
-    <artifactId>System-Design-Interview</artifactId>
+    <artifactId>system-design-interview</artifactId>
     <description>System Design Interview Prep</description>
     <version>1.0-SNAPSHOT</version>
 
