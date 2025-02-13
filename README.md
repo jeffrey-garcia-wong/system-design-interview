@@ -87,3 +87,12 @@ https://www.mongodb.com/developer/products/mongodb/active-active-application-arc
 
 [Facebook - Scaling Out](https://www.facebook.com/notes/10158772759002200/)
 [MongoDB - Active-Active Application Architecture](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
+
+
+### P, NP, NP-Complete and NP-Hard Problems
+https://g.co/gemini/share/d5692e900e71
+https://www.baeldung.com/cs/p-np-np-complete-np-hard
+https://leimao.github.io/blog/P-VS-NP/
+https://news.mit.edu/2009/explainer-pnp
+https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-quantum-computing
+https://ed.ted.com/lessons/the-high-stakes-race-to-make-quantum-computers-work-chiara-decaroli/digdeeper
