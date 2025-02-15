@@ -81,6 +81,13 @@ https://www.mongodb.com/developer/products/mongodb/active-active-application-arc
 
 ### ZooKeeper
 
+### Caching
+`Read-Aside Caching`
+https://blogs.vmware.com/tanzu/an-introduction-to-look-aside-vs-inline-caching-patterns/
+
+### Event Driven Architecture
+https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589800(v=pandp.10)
+
 
 ### Active-Active Architecture
 `Scaling Out`
