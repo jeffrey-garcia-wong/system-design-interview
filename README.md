@@ -1,14 +1,25 @@
 # System Design Interview
 
 ### Table of Contents
-1. Warm-up
-2. Collecting Requirements
-3. Event Drive Architecture
-3. Active-Active Architecture
+1. CAP Theorem
+2. Warm-up
+3. Collecting Requirements
+4. Event Drive Architecture
+5. Active-Active Architecture
 
 <hr>
 
 ### CAP Theorem
+- `C` 
+  - The system has only one node and therefore data consistency (C) is not a concern, but it doesn’t provide high availability (A) over networked nodes (P) 
+- `AP`
+  - The system has multiple nodes across the network (P) to provides high availability (A), but then data consistency across the nodes cannot be achieved (C), as data replication over the networked node is susceptible to delay and failure, consistency cannot be guaranteed. Data will only be eventually consistent across all the nodes when network is resumed.
+- `CP`
+  - The system has multiple nodes across the network (P), however in favour of data consistency (C), it needs to stop accepting write requests (give up A) before data synchronisation is completed across all the nodes
+- `AC`
+  - Theoretically doesn’t exist because high availability (A) requires partition tolerance (P), but once networked nodes are introduced, consistency cannot be guaranteed unless we give-up availability, or we have to tradeoff consistency for high availability (see AP and CP above).
+- `ACP`
+  - The system has multiple nodes across the network (P) for the sake of availability (A), however in favour of data consistency (C), it can only accept write on a single node (A is limited) AND forced to use a synchronous replication to all the networked nodes (P), with a tradeoff in performance (write latency). Synchronous replication must be atomic (rollback all everything if replication timeout) to achieve data consistency across all replica.
 
 ### Warm-up
 `The Mentality`
