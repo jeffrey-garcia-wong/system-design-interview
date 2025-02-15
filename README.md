@@ -8,6 +8,8 @@
 
 <hr>
 
+### CAP Theorem
+
 ### Warm-up
 `The Mentality`
 `Back of the Envelope`
