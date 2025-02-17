@@ -1,33 +1,38 @@
 # System Design Interview
 
-### Table of Contents
+## Table of Contents
 1. CAP Theorem
 2. Warm-up
-3. Collecting Requirements
-4. Event Drive Architecture
-5. Active-Active Architecture
+3. Mongo DB
+4. Kafka
+5. Zookeeper
+6. Redis Caching
+7. Event Drive Architecture
+8. Active-Active Architecture
+9. P, NP, NP-Complete and NP-Hard Problems
 
 <hr>
 
-### CAP Theorem
-- `C` 
-  - The system has only one node and therefore data consistency (C) is not a concern, but it doesn’t provide high availability (A) over networked nodes (P) 
-- `AP`
-  - The system has multiple nodes across the network (P) to provides high availability (A), but then data consistency across the nodes cannot be achieved (C), as data replication over the networked node is susceptible to delay and failure, consistency cannot be guaranteed. Data will only be eventually consistent across all the nodes when network is resumed.
-- `CP`
-  - The system has multiple nodes across the network (P), however in favour of data consistency (C), it needs to stop accepting write requests (give up A) before data synchronisation is completed across all the nodes
-- `AC`
-  - Theoretically doesn’t exist because high availability (A) requires partition tolerance (P), but once networked nodes are introduced, consistency cannot be guaranteed unless we give-up availability, or we have to tradeoff consistency for high availability (see AP and CP above).
-- `ACP`
-  - The system has multiple nodes across the network (P) for the sake of availability (A), however in favour of data consistency (C), it can only accept write on a single node (A is limited) AND forced to use a synchronous replication to all the networked nodes (P), with a tradeoff in performance (write latency). Synchronous replication must be atomic (rollback all everything if replication timeout) to achieve data consistency across all replica.
+## CAP Theorem
+- C 
+  > The system has only one node and therefore data consistency (C) is not a concern, but it doesn’t provide high availability (A) over networked nodes (P) 
+- AP
+  > The system has multiple nodes across the network (P) to provides high availability (A), but then data consistency across the nodes cannot be achieved (C), as data replication over the networked node is susceptible to delay and failure, consistency cannot be guaranteed. Data will only be eventually consistent across all the nodes when network is resumed.
+- CP
+  > The system has multiple nodes across the network (P), however in favour of data consistency (C), it needs to stop accepting write requests (give up A) before data synchronisation is completed across all the nodes
+- AC
+  > Theoretically doesn’t exist because high availability (A) requires partition tolerance (P), but once networked nodes are introduced, consistency cannot be guaranteed unless we give-up availability, or we have to tradeoff consistency for high availability (see AP and CP above).
+- ACP
+  > The system has multiple nodes across the network (P) for the sake of availability (A), however in favour of data consistency (C), it can only accept write on a single node (A is limited) AND forced to use a synchronous replication to all the networked nodes (P), with a tradeoff in performance (write latency). Synchronous replication must be atomic (rollback all everything if replication timeout) to achieve data consistency across all replica.
 
-### Warm-up
+## Warm-up
 `The Mentality`
 `Back of the Envelope`
 
-[Facebook - The full stack part 1](https://www.facebook.com/notes/10158791462547200/)
+https://www.facebook.com/notes/10158791462547200/
+https://static.googleusercontent.com/media/research.google.com/en//people/jeff/stanford-295-talk.pdf
 
-### Collecting Requirements
+### Data-Driven Requirements
 One way to visualize a system is how its data is shaped and how it flows. 
 Here are a some useful factors to think about:
 
@@ -67,52 +72,181 @@ First, we make assumptions to build a MVP with limited features
 
 Solution: Apply the model above to visualise the requirements in terms of data.
 
+### Non-Functional Requirements
+- Scalability
+- Consistency
+- Performance
+- Resiliency
+- Security
+
 <hr>
 
-### MongoDB
+## MongoDB
 `NoSQL`
+`Document DB`
 `Schema Design`
+`Embedded Document`
 `Sharding`
-`ReplicaSet`
+`Replica Set`
 `Transaction`
-`Read Write Concern`
-https://www.mongodb.com/resources/basics/databases/nosql-explained
-https://www.mongodb.com/developer/products/mongodb/mongodb-schema-design-best-practices/
-https://www.mongodb.com/resources/products/capabilities/sharding
-https://www.mongodb.com/docs/manual/core/sharding-choose-a-shard-key/
-https://www.mongodb.com/docs/manual/replication/
-https://www.mongodb.com/blog/post/mongodb-multi-document-acid-transactions-general-availability
-https://www.mongodb.com/docs/manual/core/read-isolation-consistency-recency/
-https://www.mongodb.com/docs/manual/core/causal-consistency-read-write-concerns/
-https://www.mongodb.com/blog/post/performance-best-practices-transactions-and-read-write-concerns
-https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/
+`Read / Write Concern`
+`Quorum`
 
-### Kafka
+### [Basics]()
+- Cluster (also called replica set) are for redundancy, not scalability.
+- You need a minimum of 3 nodes in a cluster, to achieve quorum.
+  - The elected primary node, which is responsible for both read and write.
+  - The secondary node, which receive the replicated data and stand-by for failure.
+    - Read requests are *distributed* between each of the secondary nodes, with the tradeoff of partially inconsistent view of data before replication of data catch-up with primary node.
+  - Automatically go into read-only mode if number of available nodes doesn't achieve quorum.
+- Each node in the cluster holds a complete copy of all the data in the database.
+- Reads and writes to the primary node are guaranteed to be strongly consistent.
+- Updates to a single document is always atomic.
+- Supports transaction across multiple documents and collections since v4.0.
+  - Even supports transaction across shards in a sharded cluster since v4.2.
+  - Should not be used frequently if document schema is designed properly.
+  - There will be performance degradation.
+- Sharding is when you divide your data and put each piece in a different replica set or cluster.
+  - It is a way for storing huge data set that cannot fit into the maximum amount of RAM can be installed on a single computer.
+  - For a minimal sharded cluster (only 2 shards) with quorum, at least 8 servers are needed, this number goes up by 3 for every shard added.
+  - It's often cheaper and easier to simply upgrade hardware (mostly RAM).
+- Another use case of sharing is to improve locality where data is stored geographically closer to the user's location, to reduce latency.
+  - A shard can associate with multiple zones
+  - A zone can associate with multiple shards
 
+#### References:
+- [NoSQL Explained](https://www.mongodb.com/resources/basics/databases/nosql-explained)
 
-### ZooKeeper
+### [Schema Design Approaches]()
+When designing a schema, we want to take into consideration the following:
+- Store the data
+- Provide good query performance
+- Require reasonable amount of hardware
 
-### Caching
+#### Embedding vs. Referencing:
+Embedding:<br/>
+
+| Pros                                                        | Cons                                                                                                |
+|-------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| can retrieve all relevant information in a single query     | overhead with large document                                                                        |
+| avoid implementing joins in application code                | embedding too much data inside a single document could potentially hit document maximum size limit. |
+| can update related information as a single atomic operation |                                                                                                     |
+
+Referencing:<br/>
+
+| Pros                                                           | Cons                                                                                 |
+|----------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| can have smaller documents by splitting data                   | read / write for all the data in referenced documents require a minimum of 2 queries |
+| less likely to hit document's size limit                       |                                                                                      |
+| avoid frequently accessing information not needed by the query |                                                                                      |
+| reduced amount of duplicated data                              |                                                                                      |
+
+* duplication of data is not necessarily bad as long it results in better schema (what defines better?)
+
+General Guidance:<br/>
+1. Favour embedding unless there is a compelling reason not to
+   - Embedding all the past addresses belonging to an individual in the Person document
+   - Embedding all the past jobs belonging to an individual in the Employee document
+2. Needing to access an object on its own is a compelling reason not to embed it
+   - Referencing all the parts composing a product in the Product document as an array of parts
+    > Application need to query what are the parts needed by a particular product
+   - Referencing all the products a part belonging to in the Part document as an array of products
+    > Application need to query what are the products that need the same part
+   - Each product has a sub-array of linked parts, and each part has a sub-array of products
+    > Many-to-many relationship is achievable but update will require modifying 2 documents in different collections in an atomic operation
+3. Avoid joins/lookups if possible
+    > Don't be afraid of splitting data into different collections if it actually produces a better schema design, where you can avoid updating duplicated data in lots of documents. i.e. Product document that embed every part's object rather than reference to an array of part's id.  
+    - Retrieve information from 2 different collections together require to use $lookup to join the data together
+    - `$lookup` operations can be expensive, so it's important to consider how "frequent" you'll need to perform `$lookup` if you choose this option.
+    - If we find ourselves frequently using `$lookup`, another option is to use the *extended reference pattern*.
+      > Instead of embedding all the information or including a reference to JOIN the information, we only embed those fields of the highest priority and most frequently accessed, this works well if the data that is stored in the main document are fields that don't frequently change.
+4. Arrays should not grow without bound 
+   - If there are more than a couple of hundred documents on the "many" side, don't embed them
+   - If there are more than a few thousand documents on the "many" side, don't use an array of ObjectID references. 
+   - High-cardinality arrays are a compelling reason not to embed references.
+   > Which data to be referenced can also depend on whether the number of the referenced data is unbounded.
+   > If the data referenced data is unbounded, storing the reference may exceed document's size limit. 
+5. How you model your data depends – entirely – on your particular application's data access patterns. 
+   > You want to structure your data to match the ways that your application queries and updates it.
+   
+#### Summary: <br/>
+- One-to-One - Prefer key value pairs within the document
+- One-to-Few - Prefer embedding
+- One-to-Many - Prefer embedding
+- One-to-Squillions - Prefer Referencing
+- Many-to-Many - Prefer Referencing
+
+#### References:
+- [Schema Design Best Practices](https://www.mongodb.com/developer/products/mongodb/mongodb-schema-design-best-practices/)
+- [Schema Design Anti-Pattern](https://www.mongodb.com/developer/products/mongodb/schema-design-anti-pattern-summary/)
+
+### Sharding
+
+#### References:
+- [Scaling](https://www.mongodb.com/resources/basics/scaling)
+- [Sharding](https://www.mongodb.com/resources/products/capabilities/sharding)
+- [Choosing a Shard Key](https://www.mongodb.com/docs/manual/core/sharding-choose-a-shard-key)
+- [Partition Tolerance](https://www.mongodb.com/docs/manual/core/sharding-data-partitioning/)
+- [Targeted Query vs Broadcast Query](https://www.mongodb.com/docs/manual/core/sharded-cluster-query-router/#targeted-operations-vs.-broadcast-operations)
+
+#### References:
+- https://www.mongodb.com/docs/manual/replication
+- https://www.mongodb.com/blog/post/mongodb-multi-document-acid-transactions-general-availability
+- https://www.mongodb.com/docs/manual/core/read-isolation-consistency-recency/
+- https://www.mongodb.com/docs/manual/core/causal-consistency-read-write-concerns/
+- https://www.mongodb.com/blog/post/performance-best-practices-transactions-and-read-write-concerns
+- https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/
+
+<hr>
+
+## Kafka
+<hr>
+
+## ZooKeeper
+<hr>
+
+## Caching
 `Read-Aside Caching`
+
 https://blogs.vmware.com/tanzu/an-introduction-to-look-aside-vs-inline-caching-patterns/
 
-### Event Driven Architecture
+<hr>
+
+## Event Driven Architecture
 https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589800(v=pandp.10)
 
+<hr>
 
-### Active-Active Architecture
-`Scaling Out`
+## Active-Active Architecture
+`High Availability`
+`Fault Tolerance`
+`Failover`
+`Single Point of Failure`
 `Multi Regions`
+`Redundancy`
+`Geo Replication`
 `Disaster Recovery`
 
+### How HA works
+1. Eliminating single points of failure
+2. Implementing reliable redundancy
+3. Facilitating system failure detection
+4. Achieving load balancing
+
 [Facebook - Scaling Out](https://www.facebook.com/notes/10158772759002200/)
+[MongoDB - Basics of High Availability](https://www.mongodb.com/resources/basics/high-availability)
 [MongoDB - Active-Active Application Architecture](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
 
+<hr>
 
-### P, NP, NP-Complete and NP-Hard Problems
+## P, NP, NP-Complete and NP-Hard Problems
+`Computational Complexity`
+
 https://g.co/gemini/share/d5692e900e71
 https://www.baeldung.com/cs/p-np-np-complete-np-hard
 https://leimao.github.io/blog/P-VS-NP/
 https://news.mit.edu/2009/explainer-pnp
 https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-quantum-computing
 https://ed.ted.com/lessons/the-high-stakes-race-to-make-quantum-computers-work-chiara-decaroli/digdeeper
+
+<hr>
