@@ -181,6 +181,15 @@ General Guidance:<br/>
 - [Schema Design Anti-Pattern](https://www.mongodb.com/developer/products/mongodb/schema-design-anti-pattern-summary/)
 
 ### Sharding
+- the cardinality of the shard key
+- the frequency with which shard key values occur
+- whether a potential shard key grows monotonically
+- Sharding Query Patterns
+- Shard Key Limitations
+
+
+#### Consideration of Shard Key
+Key criteria, ensure data is distributed evenly across shards, or new shards can be added and won't be bounded by the limitation of the shard keys itself.
 
 #### References:
 - [Scaling](https://www.mongodb.com/resources/basics/scaling)
