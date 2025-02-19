@@ -1,4 +1,9 @@
 # System Design Interview
+- Requests volume drives scalability need.
+- Horizontal scaling improves read performance but introduce 
+challenges in data consistency for write requests.
+- To achieve data consistency system needs to compromise 
+write performance.
 
 ## Table of Contents
 1. CAP Theorem
@@ -181,30 +186,122 @@ General Guidance:<br/>
 - [Schema Design Anti-Pattern](https://www.mongodb.com/developer/products/mongodb/schema-design-anti-pattern-summary/)
 
 ### Sharding
+#### Benefits of Sharding
+- Increased read/write throughput
+- High availability
+- Increased storage capacity
+- Data locality
+
+#### Consideration of Shard Key
+Key criteria, ensure data is distributed evenly across shards, or new shards can be added and won't be bounded by the limitation of the shard keys itself.
 - the cardinality of the shard key
 - the frequency with which shard key values occur
 - whether a potential shard key grows monotonically
 - Sharding Query Patterns
 - Shard Key Limitations
+> The shard key value has a direct impact on the cluster's performance and should be chosen carefully. A poorly chosen shard key can lead to performance or scaling issues due to uneven chunk distribution.
 
+#### Sharding Strategy
+The type of strategy used can depend on query patterns, application use cases, and data distribution patterns.
+- Ranged sharding
+    > Ranged sharding is most efficient when the shard key displays the below characteristics.
+    - High shard key cardinality 
+      - large number of different values so it won't limit the number of shard
+      - if number of shards are limited then the system cannot further scale-out even more shards are added
+    - Low shard key frequency
+      - avoid un-even distribution of data into particular shards
+    - Non-monotonically changing shard keys
+      - avoid un-even distribution of data into particular shards
+    > A range of shard keys whose values are “close” are more likely to reside on the same chunk. This allows for targeted operations as a mongos can route the operations to only the shards that contain the required data.
 
-#### Consideration of Shard Key
-Key criteria, ensure data is distributed evenly across shards, or new shards can be added and won't be bounded by the limitation of the shard keys itself.
+- Hashed sharding
+    - High shard key cardinality
+      - large number of different values so it won't limit the number of shards
+      - imply low shard key frequency so data is more evenly distributed
+    - Ideal for shard keys with fields that change monotonically
+    > Data distribution based on hashed values facilitates more even data distribution, especially in data sets where the shard key changes monotonically. However, hashed sharding does not provide efficient range-based operations.
 
-#### References:
+- Zone sharding
+    > Zone sharding organizes data into different zones, depending on the application requirements. For example, you may want to store data of all Europe users together, so you can create a zone which has data of all Europe customers. Each zone can be associated with one or more shards, and each shard can have data of one or more zones.
+
+#### Sharding Query Patterns
+Because each node only stores part of the data, for each request, the database 
+queries need to determine which node or nodes contain the relevant data.
+
+If the data is stored across multiple nodes, the reads and writes could be done 
+in parallel. For large-volume data reads, performance is improved because each 
+node can read its section of data in parallel with the other nodes.
+
+There is an overhead to reading from multiple nodes. The data from all the nodes 
+still needs to be transferred over the network and then combined into a query 
+result set. For small data reads, the network latency could be a significant 
+portion of the overall query time. For those scenarios, it's more efficient to 
+query using `targeted operations` instead of `broadcast operations`.
+
+| Targeted operations |
+|---------------------|
+| insertOne()         |
+| updateOne()         |
+| replaceOne()        |
+| deleteOne()         |
+
+| Broadcast operations |
+|----------------------|
+| insertMany()         |
+| updateMany()         |
+| deleteMany()         |
+
+*Generally, the fastest queries in a sharded environment are those that mongos route to a single shard, using the shard key and the cluster meta data from the config server.*
+
+> The ideal shard key distributes data evenly across the sharded cluster while also facilitating common query patterns. When you choose a shard key, consider your most common query patterns and whether a given shard key covers them.
+
+#### Replication
+Replication provides redundancy and increases data availability. With multiple copies 
+of data on different database servers, replication provides a level of fault tolerance 
+against the loss of a single database server.
+
+Replication also provides increased read capacity as clients can send read operations 
+to different servers. Maintaining copies of data in different data centers can increase 
+data locality and availability for distributed applications.
+
+The primary node receives all write operations. A replica set can have only one primary 
+capable of confirming writes with `{ w: "majority" }` write concern; although in some 
+circumstances, another mongod instance may transiently believe itself to also be primary.
+
+The secondary nodes replicate the primary's oplog and apply the operations to their data 
+sets such that the secondaries' data sets reflect the primary's data set. If the primary 
+is unavailable, an eligible secondary will hold an election to elect itself the new primary.
+
+Secondary nodes replicate the primary's oplog and apply the operations to their data sets 
+asynchronously. Replication lag is a delay between an operation on the primary and the 
+application of that operation from the oplog to the secondary. Some small delay period 
+may be acceptable, but significant problems emerge as replication lag grows, including 
+building cache pressure on the primary.
+
+By default, clients read from the primary; however, clients can specify a read preference
+to send read operations to secondary nodes. Asynchronous replication to secondary nodes
+means that reads from secondaries may return data that does not reflect the state of the
+data on the primary. Distributed transactions that contain read operations must use read 
+preference primary, all operations in a given transaction must route to the same member.
+
+To ensure isolation and consistency, the read concern can be set to majority to indicate 
+that data should only be returned to the application if it has first been replicated to 
+a majority of the nodes in the replica set, and so cannot be rolled back in the event of 
+the election of a new primary node.
+
+#### References
 - [Scaling](https://www.mongodb.com/resources/basics/scaling)
 - [Sharding](https://www.mongodb.com/resources/products/capabilities/sharding)
+- [Sharding Strategy](https://www.mongodb.com/docs/manual/sharding/#sharding-strategy)
 - [Choosing a Shard Key](https://www.mongodb.com/docs/manual/core/sharding-choose-a-shard-key)
 - [Partition Tolerance](https://www.mongodb.com/docs/manual/core/sharding-data-partitioning/)
 - [Targeted Query vs Broadcast Query](https://www.mongodb.com/docs/manual/core/sharded-cluster-query-router/#targeted-operations-vs.-broadcast-operations)
-
-#### References:
-- https://www.mongodb.com/docs/manual/replication
-- https://www.mongodb.com/blog/post/mongodb-multi-document-acid-transactions-general-availability
-- https://www.mongodb.com/docs/manual/core/read-isolation-consistency-recency/
-- https://www.mongodb.com/docs/manual/core/causal-consistency-read-write-concerns/
-- https://www.mongodb.com/blog/post/performance-best-practices-transactions-and-read-write-concerns
-- https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/
+- [Replication](https://www.mongodb.com/docs/manual/replication)
+- [Multi-Document Acid Transaction](https://www.mongodb.com/blog/post/mongodb-multi-document-acid-transactions-general-availability)
+- [Read Isolation, Consistency, and Recency](https://www.mongodb.com/docs/manual/core/read-isolation-consistency-recency/)
+- [Causal Consistency and Read and Write Concerns](https://www.mongodb.com/docs/manual/core/causal-consistency-read-write-concerns/)
+- [Performance Best Practices: Transactions and Read / Write Concerns](https://www.mongodb.com/blog/post/performance-best-practices-transactions-and-read-write-concerns)
+- [](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
 
 <hr>
 
