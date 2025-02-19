@@ -96,6 +96,8 @@ Solution: Apply the model above to visualise the requirements in terms of data.
 `Transaction`
 `Read / Write Concern`
 `Quorum`
+`Eventual Consistency`
+`Casual Consistency`
 
 ### [Basics]()
 - Cluster (also called replica set) are for redundancy, not scalability.
@@ -298,10 +300,12 @@ the election of a new primary node.
 - [Targeted Query vs Broadcast Query](https://www.mongodb.com/docs/manual/core/sharded-cluster-query-router/#targeted-operations-vs.-broadcast-operations)
 - [Replication](https://www.mongodb.com/docs/manual/replication)
 - [Multi-Document Acid Transaction](https://www.mongodb.com/blog/post/mongodb-multi-document-acid-transactions-general-availability)
+- [Read Preference](https://www.mongodb.com/docs/manual/core/read-preference/)
 - [Read Isolation, Consistency, and Recency](https://www.mongodb.com/docs/manual/core/read-isolation-consistency-recency/)
 - [Causal Consistency and Read and Write Concerns](https://www.mongodb.com/docs/manual/core/causal-consistency-read-write-concerns/)
 - [Performance Best Practices: Transactions and Read / Write Concerns](https://www.mongodb.com/blog/post/performance-best-practices-transactions-and-read-write-concerns)
-- [](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
+- [Sharding in HA](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
+- [Segementing Data by Location](https://www.mongodb.com/docs/manual/tutorial/sharding-segmenting-data-by-location/)
 
 <hr>
 
@@ -339,15 +343,17 @@ https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589800(v=pandp.10)
 3. Facilitating system failure detection
 4. Achieving load balancing
 
-[Facebook - Scaling Out](https://www.facebook.com/notes/10158772759002200/)
-[MongoDB - Basics of High Availability](https://www.mongodb.com/resources/basics/high-availability)
-[MongoDB - Active-Active Application Architecture](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
+#### References:
+- [Facebook - Scaling Out](https://www.facebook.com/notes/10158772759002200/)
+- [MongoDB - Basics of High Availability](https://www.mongodb.com/resources/basics/high-availability)
+- [MongoDB - Active-Active Application Architecture](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
 
 <hr>
 
 ## P, NP, NP-Complete and NP-Hard Problems
 `Computational Complexity`
 
+#### References:
 https://g.co/gemini/share/d5692e900e71
 https://www.baeldung.com/cs/p-np-np-complete-np-hard
 https://leimao.github.io/blog/P-VS-NP/
