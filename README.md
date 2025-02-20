@@ -257,7 +257,15 @@ query using `targeted operations` instead of `broadcast operations`.
 
 > The ideal shard key distributes data evenly across the sharded cluster while also facilitating common query patterns. When you choose a shard key, consider your most common query patterns and whether a given shard key covers them.
 
-#### Replication
+#### References
+- [Scaling](https://www.mongodb.com/resources/basics/scaling)
+- [Sharding](https://www.mongodb.com/resources/products/capabilities/sharding)
+- [Sharding Strategy](https://www.mongodb.com/docs/manual/sharding/#sharding-strategy)
+- [Choosing a Shard Key](https://www.mongodb.com/docs/manual/core/sharding-choose-a-shard-key)
+- [Partition Tolerance](https://www.mongodb.com/docs/manual/core/sharding-data-partitioning/)
+- [Targeted Query vs Broadcast Query](https://www.mongodb.com/docs/manual/core/sharded-cluster-query-router/#targeted-operations-vs.-broadcast-operations)
+
+### Replication
 Replication provides redundancy and increases data availability. With multiple copies 
 of data on different database servers, replication provides a level of fault tolerance 
 against the loss of a single database server.
@@ -292,12 +300,6 @@ a majority of the nodes in the replica set, and so cannot be rolled back in the 
 the election of a new primary node.
 
 #### References
-- [Scaling](https://www.mongodb.com/resources/basics/scaling)
-- [Sharding](https://www.mongodb.com/resources/products/capabilities/sharding)
-- [Sharding Strategy](https://www.mongodb.com/docs/manual/sharding/#sharding-strategy)
-- [Choosing a Shard Key](https://www.mongodb.com/docs/manual/core/sharding-choose-a-shard-key)
-- [Partition Tolerance](https://www.mongodb.com/docs/manual/core/sharding-data-partitioning/)
-- [Targeted Query vs Broadcast Query](https://www.mongodb.com/docs/manual/core/sharded-cluster-query-router/#targeted-operations-vs.-broadcast-operations)
 - [Replication](https://www.mongodb.com/docs/manual/replication)
 - [Multi-Document Acid Transaction](https://www.mongodb.com/blog/post/mongodb-multi-document-acid-transactions-general-availability)
 - [Read Preference](https://www.mongodb.com/docs/manual/core/read-preference/)
@@ -310,6 +312,36 @@ the election of a new primary node.
 <hr>
 
 ## Kafka
+
+### Message Ordering and Parallel Consumers
+https://github.com/confluentinc/parallel-consumer?tab=readme-ov-file#ordering-guarantees
+
+### Exactly Once
+https://www.confluent.io/blog/simplified-robust-exactly-one-semantics-in-kafka-2-5/
+https://www.confluent.io/blog/exactly-once-semantics-are-possible-heres-how-apache-kafka-does-it/
+https://www.confluent.io/blog/enabling-exactly-once-kafka-streams/
+
+### Transaction 
+https://www.confluent.io/blog/transactions-apache-kafka/
+https://docs.confluent.io/platform/current/kafka/authorization.html#transactional-id-resource-type-operations
+https://docs.spring.io/spring-kafka/reference/kafka/transactions.html
+https://docs.spring.io/spring-kafka/reference/tips.html#ex-jdbc-sync
+
+### KIP
+Key Design Considerations of EOS and Transaction
+https://cwiki.apache.org/confluence/display/KAFKA/Transactional+Messaging+in+Kafka
+https://cwiki.apache.org/confluence/display/KAFKA/Idempotent+Producer
+
+KIP-98 exactly-once-delivery and transactional messaging
+https://cwiki.apache.org/confluence/display/KAFKA/
+
+(Both KIP-360 and KIP-447 aims at improving the resiliency of the implementation that powers EOS and Transaction:
+KIP-360 added a mechanism for producers to automatically recover when they encounter these cases and continue processing.
+https://cwiki.apache.org/confluence/pages/viewpage.action?pageId=89068820
+
+KIP-447 supplements KIP-360 as a fundamental improvement to the transactional semantics.
+https://cwiki.apache.org/confluence/display/KAFKA/KIP-447%3A+Producer+scalability+for+exactly+once+semantics
+
 <hr>
 
 ## ZooKeeper
