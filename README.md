@@ -357,6 +357,20 @@ https://blogs.vmware.com/tanzu/an-introduction-to-look-aside-vs-inline-caching-p
 ## Event Driven Architecture
 https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589800(v=pandp.10)
 
+CQRS
+https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591577(v=pandp.10)
+https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn568103(v=pandp.10)
+
+SAGA
+https://learn.microsoft.com/en-us/azure/architecture/patterns/saga
+https://learn.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v=pandp.10)
+
+Compensation
+https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589804(v=pandp.10)
+
+Event Sourcing
+https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn589792(v=pandp.10)
+
 <hr>
 
 ## Active-Active Architecture
