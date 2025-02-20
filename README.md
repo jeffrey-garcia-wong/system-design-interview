@@ -355,7 +355,12 @@ https://blogs.vmware.com/tanzu/an-introduction-to-look-aside-vs-inline-caching-p
 <hr>
 
 ## Event Driven Architecture
+
 https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589800(v=pandp.10)
+
+An event‑driven architecture has several benefits and drawbacks. It enables the implementation of transactions that span multiple services and provide eventual consistency. Another benefit is that it also enables an application to maintain materialized views. You can use events to maintain materialized views that pre‑join data owned by multiple microservices. The service that maintains the view subscribes to the relevant events and updates the view.
+
+One drawback is that the programming model is more complex than when using ACID transactions. Each service must atomically updates the database and publishes an event, moreover you must implement compensating transactions to recover from application‑level failures; for example, you must cancel an order if the credit check fails. Also, applications must deal with inconsistent data. That is because changes made by in‑flight transactions are visible. The application can also see inconsistencies if it reads from a materialized view that is not yet updated. Another drawback is that subscribers must detect and ignore duplicate events.
 
 CQRS
 https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591577(v=pandp.10)
