@@ -1,26 +1,25 @@
 # System Design Interview
-- Requests volume drives scalability need.
-- Horizontal scaling improves read performance but introduce 
-challenges in data consistency for write requests.
-- To achieve data consistency system needs to compromise 
-write performance.
 
 ## Table of Contents
-1. CAP Theorem
-2. Warm-up
-3. Mongo DB
-4. Kafka
-5. Zookeeper
-6. Redis Caching
-7. Event Drive Architecture
-8. Active-Active Architecture
-9. P, NP, NP-Complete and NP-Hard Problems
+- Warm-up 
+- Mongo DB 
+- Kafka 
+- Zookeeper 
+- Redis Caching 
+- Event Drive Architecture
+- Active-Active Architecture 
+- P, NP, NP-Complete and NP-Hard Problems
 
 <hr>
 
-## CAP Theorem
-- C 
-  > The system has only one node and therefore data consistency (C) is not a concern, but it doesn’t provide high availability (A) over networked nodes (P) 
+## Warm-up
+`The Mentality`
+`Back of the Envelope`
+`Full-Stack`
+
+### CAP Theorem
+- C
+  > The system has only one node and therefore data consistency (C) is not a concern, but it doesn’t provide high availability (A) over networked nodes (P)
 - AP
   > The system has multiple nodes across the network (P) to provides high availability (A), but then data consistency across the nodes cannot be achieved (C), as data replication over the networked node is susceptible to delay and failure, consistency cannot be guaranteed. Data will only be eventually consistent across all the nodes when network is resumed.
 - CP
@@ -29,14 +28,7 @@ write performance.
   > Theoretically doesn’t exist because high availability (A) requires partition tolerance (P), but once networked nodes are introduced, consistency cannot be guaranteed unless we give-up availability, or we have to tradeoff consistency for high availability (see AP and CP above).
 - ACP
   > The system has multiple nodes across the network (P) for the sake of availability (A), however in favour of data consistency (C), it can only accept write on a single node (A is limited) AND forced to use a synchronous replication to all the networked nodes (P), with a tradeoff in performance (write latency). Synchronous replication must be atomic (rollback all everything if replication timeout) to achieve data consistency across all replica.
-
-## Warm-up
-`The Mentality`
-`Back of the Envelope`
-
-https://www.facebook.com/notes/10158791462547200/
-https://static.googleusercontent.com/media/research.google.com/en//people/jeff/stanford-295-talk.pdf
-
+  
 ### Data-Driven Requirements
 One way to visualize a system is how its data is shaped and how it flows. 
 Here are a some useful factors to think about:
@@ -77,12 +69,23 @@ First, we make assumptions to build a MVP with limited features
 
 Solution: Apply the model above to visualise the requirements in terms of data.
 
+#### References
+- [Facebook - the full stack](https://www.facebook.com/notes/10158791462547200/)
+- [Google - Numbers you should know](https://static.googleusercontent.com/media/research.google.com/en//people/jeff/stanford-295-talk.pdf)
+
 ### Non-Functional Requirements
-- Scalability
-- Consistency
+Classic design consideration for distributed system.
+- Capacity
+    - Requests volume drives scalability need.
 - Performance
+    - Horizontal scaling improves read performance but introduce challenges in data consistency for write requests.
+- Durability
+- Consistency
+    - To achieve data consistency system needs to compromise write performance.
+- Availability
+- Scalability
 - Resiliency
-- Security
+- Security 
 
 <hr>
 
@@ -97,7 +100,7 @@ Solution: Apply the model above to visualise the requirements in terms of data.
 `Read / Write Concern`
 `Quorum`
 `Eventual Consistency`
-`Casual Consistency`
+`Causal Consistency`
 
 ### [Basics]()
 - Cluster (also called replica set) are for redundancy, not scalability.
@@ -307,7 +310,7 @@ the election of a new primary node.
 - [Causal Consistency and Read and Write Concerns](https://www.mongodb.com/docs/manual/core/causal-consistency-read-write-concerns/)
 - [Performance Best Practices: Transactions and Read / Write Concerns](https://www.mongodb.com/blog/post/performance-best-practices-transactions-and-read-write-concerns)
 - [Sharding in HA](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
-- [Segementing Data by Location](https://www.mongodb.com/docs/manual/tutorial/sharding-segmenting-data-by-location/)
+- [Segmenting Data by Location](https://www.mongodb.com/docs/manual/tutorial/sharding-segmenting-data-by-location/)
 
 <hr>
 
@@ -348,33 +351,232 @@ https://cwiki.apache.org/confluence/display/KAFKA/KIP-447%3A+Producer+scalabilit
 <hr>
 
 ## Caching
-`Read-Aside Caching`
+`Read-Aside Caching` `in-memory` `caching pattern`
 
-https://blogs.vmware.com/tanzu/an-introduction-to-look-aside-vs-inline-caching-patterns/
+### Cache Eviction Strategies
 
+#### Least Recently Used (LRU)
+#### Least Frequently Used (LFU)
+#### Window TinyLFU (W-TinyLFU)
+#### Time To Live (TTL)
+
+#### References
+- [Caching Pattern](https://blogs.vmware.com/tanzu/an-introduction-to-look-aside-vs-inline-caching-patterns)
+- [Cache Eviction Policies](https://redis.io/blog/cache-eviction-strategies/)
+- [LRU Cache Implementation](https://www.interviewcake.com/concept/java/lru-cache)
+- [MongoDB In-Memory Database](https://www.mongodb.com/resources/basics/databases/in-memory-database)
 <hr>
 
 ## Event Driven Architecture
+`Eventual Consistency`
+`Event-Drive Architecture` 
+`SAGA`
+`CQRS`
+`Compensating Transaction`
+`Exactly-once Delivery`
+`At-least-once Delivery`
+`De-duplication`
+`Idempotency`
 
-https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589800(v=pandp.10)
+### Eventual Consistency
+In a modern cloud application, the data is likely to be partitioned across data stores hosted 
+at different sites, some of which could be dispersed over a wide geography. This can occur for 
+a variety of reasons: to improve scalability by balancing the load across multiple computers, 
+to improve response time by co-locating data close to the users and services that access it, 
+or to improve availability by replicating data across different sites.
 
-An event‑driven architecture has several benefits and drawbacks. It enables the implementation of transactions that span multiple services and provide eventual consistency. Another benefit is that it also enables an application to maintain materialized views. You can use events to maintain materialized views that pre‑join data owned by multiple microservices. The service that maintains the view subscribes to the relevant events and updates the view.
+Maintaining data consistency across distributed data stores can be a significant challenge. 
+The issue is that strategies such as serialization and locking only work well if all application 
+instances share the same data store, and the application is designed to ensure that the locks 
+are very short-lived. However, if data is partitioned or replicated across different data stores, 
+locking and serializing data access to maintain consistency can become an expensive overhead 
+that impacts the throughput, response time, and scalability of a system. Therefore, most modern 
+distributed applications do not lock the data that they modify, and they take a rather more 
+relaxed approach to consistency, known as eventual consistency.
 
-One drawback is that the programming model is more complex than when using ACID transactions. Each service must atomically updates the database and publishes an event, moreover you must implement compensating transactions to recover from application‑level failures; for example, you must cancel an order if the credit check fails. Also, applications must deal with inconsistent data. That is because changes made by in‑flight transactions are visible. The application can also see inconsistencies if it reads from a materialized view that is not yet updated. Another drawback is that subscribers must detect and ignore duplicate events.
+In a system that implements strong consistency but also replicates data to remote locations, 
+it may be appropriate to propagate changes to replicas outside the scope of a strongly consistent 
+transaction. Some level of transient inconsistency is almost inevitable while replicas are 
+updated—but the data will eventually become consistent after the synchronization between 
+replicas has completed.
 
-CQRS
-https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj591577(v=pandp.10)
-https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn568103(v=pandp.10)
+Eventual consistency is a pragmatic approach to data consistency. In many cases, strong consistency
+is not actually required as long all the work performed by a transaction is completed or rolled
+back at some point, and no updates are lost. In the eventual consistency model, data update
+operations that span multiple sites can ripple through the various data stores in their own time,
+without blocking concurrent application instances that access the same data.
 
-SAGA
-https://learn.microsoft.com/en-us/azure/architecture/patterns/saga
-https://learn.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v=pandp.10)
+An application may therefore see a view of a data item affected by an operation in the state
+it is in while the operation is in flight, and this view may be temporarily inconsistent.
+Depending on the requirements of the system, the developer might need to design applications
+to detect and handle such inconsistencies, and then take steps to resolve them if necessary.
+The developer must also ensure that the system does eventually become consistent. In other
+words, the application is responsible for guaranteeing either that all steps in a specific
+business process complete, or determining the actions to take if any of the steps fail.
+How you resolve this situation in any given system is inevitably application specific.
 
-Compensation
-https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589804(v=pandp.10)
+#### References
+- [Data Consistency Primer](https://learn.microsoft.com/en-us/previous-versions/msp-n-p/dn589800(v=pandp.10))
 
-Event Sourcing
-https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn589792(v=pandp.10)
+### SAGA
+The Saga design pattern helps maintain data consistency in distributed systems by coordinating 
+transactions across multiple services. A saga is a sequence of *local transactions* where each 
+service performs its operation and initiates the next step through events or messages. If a 
+step in the sequence fails, the saga executes compensating transactions to undo the completed 
+steps, maintaining data consistency.
+
+Each local transaction:
+1. Completes its work atomically within a single service.
+2. Updates the service's database.
+3. Initiates the next transaction via an event or message.
+4. If a local transaction fails, the saga executes a series of compensating transactions to reverse 
+the changes made by the preceding local transactions.
+
+There are two common saga implementation approaches, choreography and orchestration.
+
+- Choreography
+    > In choreography, services exchange events without a centralized controller. With choreography, each local transaction publishes domain events that trigger local transactions in other services
+
+    | Pros                                                                                                                   | Cons                                                                                                                           |
+    |------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+    | Good for simple workflows with few services and don't need a coordination logic.                                       | Workflow can become confusing when adding new steps. It's difficult to track which saga participants listen to which commands. |
+    | No other service is required for coordination.	                                                                        | There's a risk of cyclic dependency between saga participants because they have to consume each other's commands.              |
+    | Doesn't introduce a single point of failure, since the responsibilities are distributed across the saga participants.	 | Integration testing is difficult because all services must be running to simulate a transaction.                               |
+
+- Orchestration
+    > In orchestration, a centralized controller (orchestrator) handles all the transactions and tells the participants which operation to perform based on events. The orchestrator executes saga requests, stores and interprets the states of each task, and handles failure recovery with compensating transactions
+    
+    | Pros                                                                 | Cons                                                                                  |
+    |----------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+    | Better suited for complex workflows or when adding new services.	    | Other design complexity requires an implementation of a coordination logic.           |
+    | Avoids cyclic dependencies since the orchestrator manages the flow.	 | Introduces a point of failure because the orchestrator manages the complete workflow. |
+    | Clear separation of responsibilities simplifies service logic.	      |                                                                                       |
+
+
+There are many issues that you must consider if you follow this model. 
+These issues are best summarized in various scenarios below: 
+
+- Shift in design thinking
+    - Adopting the Saga pattern requires a different mindset, focusing on coordinating transactions and ensuring data consistency across multiple microservices
+  
+- Complexity of debugging sagas
+    - Debugging sagas can be complex, especially as the number of participating services grows.
+  
+- Irreversible local database changes
+  - Data can't be rolled back because saga participants commit changes to their respective databases.
+  
+- Handling transient failures and idempotence
+  - The system must handle transient failures effectively and ensure idempotence, where repeating the same operation doesn't alter the outcome.
+
+- Need for monitoring and tracking sagas
+  - Monitoring and tracking the workflow of a saga are essential to maintain operational oversight.
+
+- Limitations of compensating transactions
+  - Compensating transactions might not always succeed, potentially leaving the system in an inconsistent state.
+
+#### References
+- [Saga Distributed Transaction Pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)
+- [A Saga on Sagas](https://learn.microsoft.com/en-us/previous-versions/msp-n-p/jj591569(v=pandp.10))
+     
+#### Retry Handling
+In a distributed environment, the inability to complete an operation is often due to some 
+type of temporary error (communication failure is always a possibility.) If such a failure 
+occurs, an application might assume that the situation is transient and simply attempt to 
+repeat the step that failed. Less transient exceptions, such as database or virtual machine 
+failure, may also occur and the remedy might be similar—wait for the system to be recovered 
+and then try the failing operation again. This approach could result in the same step actually 
+being run twice, possibly resulting in multiple updates. It is very difficult to design a 
+solution to prevent this repetition from occurring, but the application should attempt to 
+render such repetition harmless.
+
+#### Idempotency
+One strategy is to design each step in an operation to be idempotent. This means that a step 
+that had previously succeeded can be repeated without actually changing the state of the system. 
+The steps that comprise a business operation are naturally heavily dependent on the business 
+logic of your system, and the way in which you implement them will be heavily influenced by 
+the structure of the data. Defining idempotent steps requires a deep, domain-specific 
+understanding of your system. 
+
+Some steps might be naturally idempotent. For example, a step that sets a particular item
+to a specific value (such as “ZipCode = 11111”) can be repeated many times and the result
+will always be the same.
+
+#### De-duplication
+In many cases, natural idempotency is not always possible. In a system that incorporates 
+services, such as the payment system shown in the ecommerce example, it may be possible 
+to implement some form of artificial idempotency. A common technique is to associate the 
+message sent to the service with a unique identifier. The service can store the identifier 
+for each message it receives locally, and only process a message if the identifier does 
+not match that of a message it received earlier. This technique is known as de-duplication 
+(the removal of duplicate messages). This strategy, exemplified by the Idempotent Receiver
+pattern, depends on the service being able to store message identifiers successfully.
+
+#### Compensation
+In a distributed environment such as the cloud, implementing strong consistency is not
+tolerant of the types of failure that may occur. For example, it may not be possible
+to roll back a transaction and release the resources that it holds if a component
+participating in the transaction has stopped responding due to a long-lasting network
+outage. In this case, rather than resolve the situation through manually reconciling 
+the data, you can implement compensating logic that undoes the work performed by the 
+operation.
+
+#### References
+- [Compensating Transaction Pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)
+
+### Event Sourcing
+Most applications adopt the typical CRUD approach to store the latest state of the data 
+in a relational database, inserting or updating data as required. 
+
+In Event Sourcing, instead of storing just the current state of the data in a relational 
+database, application code raises events that imperatively describe the action taken on 
+the object. The events are generally sent to a queue where a separate process, an event 
+handler, listens to the queue and persists the events in an event store. 
+
+Event store the full series of actions taken on an object in an append-only store. The store 
+acts as the system of record and can be used to materialize the domain objects. This approach 
+can improve *performance*, *scalability*, and *auditability* in complex systems.
+
+- Performance
+  - On the write side, because every event is persisted in an append-only store, concurrent 
+  update is avoided, thus there is no need for any synchronous lock or transaction processing.
+  - On the read side, applications typically implement materialized views, read-only projections 
+  of the event store that are optimized for querying.
+- Scalability
+  - Due to the nature of append-only write to the event store, there will be no contention 
+  as the system scale out and with increased number of write requests.
+- Auditability
+  - Because the event store is append-only, events are immutable, providing an audit trail 
+  that can be used to monitor actions taken against a data store. It can regenerate the current 
+  state as materialized views or projections by replaying the events at any time, and it can 
+  assist in testing and debugging the system. In addition, the requirement to use compensating 
+  events to cancel changes can provide a history of changes that were reversed. This capability 
+  wouldn't be the case if the model stored the current state. The list of events can also be 
+  used to analyze application performance and to detect user behavior trends. Or, it can be 
+  used to obtain other useful business information.
+
+#### References
+- [Event Sourcing Pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
+
+### CQRS
+Command and Query Responsibility Segregation (CQRS) is a pattern that segregates the operations 
+that read data (Queries) from the operations that update data (Commands) by using separate 
+interfaces. This implies that the data models used for querying and updates are different.
+
+Separation of the read and write stores also allows each to be scaled appropriately to match 
+the load. For example, read stores typically encounter a much higher load that write stores.
+
+When the query/read model contains denormalized information (see Materialized View Pattern), 
+performance is maximized when reading data for each of the views in an application or when 
+querying the data in the system.
+
+A typical approach to embracing eventual consistency is to use event sourcing in conjunction 
+with CQRS so that the write model is an append-only stream of events driven by execution of 
+commands. These events are used to update materialized views that act as the read model. 
+For more information see Event Sourcing and CQRS.
+
+#### References
+- [CQRS Pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs)
+- [CQRS and Event Sourcing](https://learn.microsoft.com/en-us/previous-versions/msp-n-p/jj591577(v=pandp.10))
 
 <hr>
 
@@ -383,16 +585,35 @@ https://docs.microsoft.com/en-us/previous-versions/msp-n-p/dn589792(v=pandp.10)
 `Fault Tolerance`
 `Failover`
 `Single Point of Failure`
-`Multi Regions`
+`Multiple Regions`
 `Redundancy`
 `Geo Replication`
 `Disaster Recovery`
 
 ### How HA works
-1. Eliminating single points of failure
-2. Implementing reliable redundancy
-3. Facilitating system failure detection
-4. Achieving load balancing
+Two important aspects of high availability are (1) a data failover system and (2) data backup.
+To achieve high availability, the system has to have a way to maintain its functionality.
+
+Typical types of failure includes:
+- routine server maintenance
+- software defects,
+- network failure,
+- hardware failure,
+- software failure,
+- power outages,
+- anything else caused by natural disasters
+
+#### Eliminating single points of failure
+Eliminating single points of failure is key in a high-availability system. Without this safeguard, if everything was running on one server, and that server failed, the whole system would go down.
+
+#### Implementing reliable redundancy
+*Redundancy* means having backup components within the HA system. That way, if the original component fails, its "twin" can take over for it, helping to minimize downtime caused by the failure and maintain high availability.
+
+#### Facilitating system failure detection
+In the event of a component failure within the primary system, there should be clear protocols in place so that (1) the failure is obvious and documented and (2) ideally, the component can resolve the issue on its own. This is an important part of disaster recovery.
+
+#### Achieving load balancing
+Load balancing means that workloads — like network traffic — are distributed across multiple systems or servers in an efficient manner. The load balancer should be able to identify the most productive way to do this. With load balancing, no one resource or server will become overwhelmed with its workload, and high availability becomes more feasible.
 
 #### References:
 - [Facebook - Scaling Out](https://www.facebook.com/notes/10158772759002200/)
@@ -413,3 +634,10 @@ https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-q
 https://ed.ted.com/lessons/the-high-stakes-race-to-make-quantum-computers-work-chiara-decaroli/digdeeper
 
 <hr>
+
+## Practice
+- Finance Reporting System
+- Money Transfer (intra-bank) System
+- Money Transfer (inter-banks) System
+- Authentication and Session Management System
+- Payment Gateway
