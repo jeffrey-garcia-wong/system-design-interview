@@ -636,6 +636,43 @@ https://ed.ted.com/lessons/the-high-stakes-race-to-make-quantum-computers-work-c
 <hr>
 
 ## Practice
+
+### Strategy
+- Database
+    > Always begin with looking at the data (data model, data size), this will give you a rough
+      idea how the data will be accessed (read/write), then estimate the capacity required
+      (storage size, computation power) and determine how will the data store scale (sharding). 
+      Clarify if all data can be stored in one region or there will be requirement for locality 
+      or compliance.
+
+- Concurrency
+    > If high consistency is required, consider read/write requests in primary node (master), 
+       otherwise distribute read requests to replicas (but beware of replication lags)
+
+- Business Process
+    > For business process that spans across multiple services, consider using event-driven 
+      architecture, aim for at-least-once delivery if exactly-once cannot be guaranteed, and 
+      focus on how to resolve duplicate scenario either by idempotency or de-duplication. 
+      Think about how to reverse an operation without rollback database but initiate a 
+      compensation.
+
+- Resiliency 
+    > Consider what level of availability is required (active-active vs active-passive). 
+      For active-active, partition the data by region such that concurrent access to data 
+      in both regions are possible. For active-passive, write is limited to active region 
+      while read from passive region can be outdated due to replication lag.
+
+- Cache
+    > Consider adding cache if data can be pre-computed in a periodic basis, or if the data is 
+        read-only (materialised view)
+
+- Event Store & CQRS
+    > Particularly if there is any audit requirements mandating all the transactions history 
+      to trace back how the current state of data is derived, or if there is a business requirement
+      which detect change from database (via CDC) and aggregate the change into a separate read-only 
+      materialised view (i.e. Project Helios)
+
+### Examples
 - Finance Reporting System
 - Money Transfer (intra-bank) System
 - Money Transfer (inter-banks) System
