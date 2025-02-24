@@ -151,7 +151,8 @@ Referencing:<br/>
 | avoid frequently accessing information not needed by the query |                                                                                      |
 | reduced amount of duplicated data                              |                                                                                      |
 
-* duplication of data is not necessarily bad as long it results in better schema (what defines better?)
+> duplication of data is not necessarily bad as long it results in better schema 
+  (when you can avoid updating duplicated data in lots of documents)
 
 General Guidance:<br/>
 1. Favour embedding unless there is a compelling reason not to
@@ -655,7 +656,7 @@ may not be optimal.
       for locality or governance.
 
 2. Concurrency
-    > If high consistency is required, consider read/write requests in primary node (master), 
+    > If *strong consistency* is required, consider read/write requests in primary node (master), 
        otherwise distribute read requests to replicas (but beware of replication lags)
 
 3. Business Process
