@@ -684,8 +684,8 @@ may not be optimal.
       materialised view, you may want to look at CQRS and event sourcing pattern.
 
 ### Examples
-- Finance Reporting System
-- Money Transfer (intra-bank) System
-- Money Transfer (inter-banks) System
+- [Finance Reporting System - Active-Passive](https://excalidraw.com/#json=OPumMv5R-RhlphU1dJIMD,sHXRyhJG4jLgAdH6nVG18A)
+- [Finance Reporting System - Active-Active](https://excalidraw.com/#json=Ivt-2v746Fr3KlPy1edRo,RiuIBRLF-Jj_olLAy6STvw)
+- [Money Transfer (intra-bank) System - Active-Passive](https://excalidraw.com/#room=62f39b883c3cd717fdcd,GSKELCtaeyEB_mrQ3VonVA)
+- Money Transfer (inter-banks) System - Active-Active
 - Authentication and Session Management System
-- Payment Gateway
