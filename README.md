@@ -681,7 +681,7 @@ may not be optimal.
     > Particularly if there is any audit requirements mandating all the transactions history 
       to trace back how the current state of data is derived, or if there is a business requirement
       which detect change from database (via CDC) and aggregate the change into a separate read-only 
-      materialised view (i.e. Project Helios)
+      materialised view, you may want to look at CQRS and event sourcing pattern.
 
 ### Examples
 - Finance Reporting System
