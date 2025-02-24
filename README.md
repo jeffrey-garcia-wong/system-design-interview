@@ -619,6 +619,7 @@ Load balancing means that workloads — like network traffic — are distributed
 - [Facebook - Scaling Out](https://www.facebook.com/notes/10158772759002200/)
 - [MongoDB - Basics of High Availability](https://www.mongodb.com/resources/basics/high-availability)
 - [MongoDB - Active-Active Application Architecture](https://www.mongodb.com/developer/products/mongodb/active-active-application-architectures/)
+- [Replicate Multi-Datacenter Topics Across Kafka Clusters](https://docs.confluent.io/platform/current/multi-dc-deployments/replicator/index.html)
 
 <hr>
 
@@ -638,35 +639,43 @@ https://ed.ted.com/lessons/the-high-stakes-race-to-make-quantum-computers-work-c
 ## Practice
 
 ### Strategy
-- Database
+Design the system based on the criteria list in the order below.
+
+It's alright when you don't have a solution to address a hard problem, just make assumptions 
+and inform the interviewers about the tradeoffs to keep things moving better than stuck. If 
+your design is right the architecture will allow the system to scale, even though the performance 
+may not be optimal.
+
+1. Database
     > Always begin with looking at the data (data model, data size), this will give you a rough
       idea how the data will be accessed (read/write), then estimate the capacity required
       (storage size, computation power) and determine how will the data store scale (sharding). 
       Clarify if all data can be stored in one region or there will be requirement for locality 
       or compliance.
 
-- Concurrency
+2. Concurrency
     > If high consistency is required, consider read/write requests in primary node (master), 
        otherwise distribute read requests to replicas (but beware of replication lags)
 
-- Business Process
+3. Business Process
     > For business process that spans across multiple services, consider using event-driven 
-      architecture, aim for at-least-once delivery if exactly-once cannot be guaranteed, and 
+      architecture, beware of choosing the appropriate partition key so message ordering can 
+      be guaranteed. Aim for at-least-once delivery if exactly-once cannot be guaranteed, and 
       focus on how to resolve duplicate scenario either by idempotency or de-duplication. 
       Think about how to reverse an operation without rollback database but initiate a 
       compensation.
 
-- Resiliency 
+4. Resiliency 
     > Consider what level of availability is required (active-active vs active-passive). 
       For active-active, partition the data by region such that concurrent access to data 
       in both regions are possible. For active-passive, write is limited to active region 
       while read from passive region can be outdated due to replication lag.
 
-- Cache
+5. Performance
     > Consider adding cache if data can be pre-computed in a periodic basis, or if the data is 
         read-only (materialised view)
 
-- Event Store & CQRS
+6. Audit
     > Particularly if there is any audit requirements mandating all the transactions history 
       to trace back how the current state of data is derived, or if there is a business requirement
       which detect change from database (via CDC) and aggregate the change into a separate read-only 
