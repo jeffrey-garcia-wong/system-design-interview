@@ -639,19 +639,20 @@ https://ed.ted.com/lessons/the-high-stakes-race-to-make-quantum-computers-work-c
 ## Practice
 
 ### Strategy
-Design the system based on the criteria list in the order below.
+Make assumptions to build a *MVP* with limited features, then start identifying all the potential 
+problems based on the list below and design your system around it.
 
 It's alright when you don't have a solution to address a hard problem, just make assumptions 
-and inform the interviewers about the tradeoffs to keep things moving better than stuck. If 
+and inform the interviewers about the tradeoffs you're proposing rather than getting stuck. If 
 your design is right the architecture will allow the system to scale, even though the performance 
 may not be optimal.
 
 1. Database
-    > Always begin with looking at the data (data model, data size), this will give you a rough
-      idea how the data will be accessed (read/write), then estimate the capacity required
-      (storage size, computation power) and determine how will the data store scale (sharding). 
-      Clarify if all data can be stored in one region or there will be requirement for locality 
-      or compliance.
+    > Always begin with looking at the data (data model), this will give you a rough idea how
+      the data will be accessed (read/write), then estimate the capacity (data size) required
+      for storage and computation power, the gives you insight how you can scale the data store 
+      (sharding). Clarify if all data can be stored in one region or there will be requirement 
+      for locality or governance.
 
 2. Concurrency
     > If high consistency is required, consider read/write requests in primary node (master), 
