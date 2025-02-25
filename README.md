@@ -349,6 +349,13 @@ https://cwiki.apache.org/confluence/display/KAFKA/KIP-447%3A+Producer+scalabilit
 <hr>
 
 ## ZooKeeper
+
+#### Reference
+- [Zookeeper Intro](https://cwiki.apache.org/confluence/display/ZOOKEEPER/ZooKeeperPresentations?preview=/24193445/61328445/unified-log-zk-nov15.pdf)
+- [Leader Election - Algorithm Explain](https://zookeeper.apache.org/doc/current/recipes.html#sc_leaderElection)
+- [Leader Election - High-Level Java Implementation](https://stackoverflow.com/questions/59151089/java-leader-election-using-zookeeper/59261449#59261449)
+- [Leader Election - Java Demo](https://github.com/neerajk3/master-slave-selection-demo/blob/master/src/main/java/com/demo/masterslave/zk/ZooKeeperClient.java)
+
 <hr>
 
 ## Caching
