@@ -359,7 +359,15 @@ https://cwiki.apache.org/confluence/display/KAFKA/KIP-447%3A+Producer+scalabilit
 <hr>
 
 ## Caching
-`Read-Aside Caching` `in-memory` `caching pattern`
+`Read-Aside Caching` 
+`in-memory` 
+`caching pattern` 
+`LRU`
+
+### Caching Pattern
+
+#### References
+- [Caching Pattern](https://blogs.vmware.com/tanzu/an-introduction-to-look-aside-vs-inline-caching-patterns)
 
 ### Cache Eviction Strategies
 
@@ -369,10 +377,34 @@ https://cwiki.apache.org/confluence/display/KAFKA/KIP-447%3A+Producer+scalabilit
 #### Time To Live (TTL)
 
 #### References
-- [Caching Pattern](https://blogs.vmware.com/tanzu/an-introduction-to-look-aside-vs-inline-caching-patterns)
 - [Cache Eviction Policies](https://redis.io/blog/cache-eviction-strategies/)
 - [LRU Cache Implementation](https://www.interviewcake.com/concept/java/lru-cache)
+
+### Couchbase
+- https://www.couchbase.com/blog/acid-properties-couchbase-part-1/
+- https://www.couchbase.com/blog/distributed-multi-document-acid-transactions-in-couchbase/
+- https://docs.couchbase.com/java-sdk/current/concept-docs/durability-replication-failure-considerations.html
+- https://docs.couchbase.com/java-sdk/current/hello-world/sample-application.html
+- https://docs.couchbase.com/java-sdk/current/concept-docs/transactions-error-handling.html#transactioncommitambiguousexception
+- https://docs.couchbase.com/java-sdk/current/howtos/distributed-acid-transactions-from-the-sdk.html
+- https://docs.couchbase.com/java-sdk/current/howtos/transactions-single-query.html
+- https://docs.couchbase.com/server/current/learn/data/durability.html
+- https://docs.couchbase.com/server/current/learn/data/transactions.html#implications-when-using-transactions
+- https://www.couchbase.com/blog/optimistic-or-pessimistic-locking-which-one-should-you-pick/
+- https://docs.couchbase.com/server/current/learn/clusters-and-availability/intra-cluster-replication.html
+- https://docs.couchbase.com/server/current/learn/data/transactions.html
+
+### Redis
+- https://redis.io/blog/diving-into-crdts/
+- https://redis.io/active-active/
+- https://redis.io/blog/database-consistency/
+- https://redis.io/learn/operate/redis-at-scale/high-availability/basic-replication
+- https://redis.io/docs/latest/operate/rs/databases/durability-ha/consistency/
+- https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/
+
+### Mongo
 - [MongoDB In-Memory Database](https://www.mongodb.com/resources/basics/databases/in-memory-database)
+
 <hr>
 
 ## Event Driven Architecture
@@ -635,12 +667,12 @@ Load balancing means that workloads — like network traffic — are distributed
 `Computational Complexity`
 
 #### References:
-https://g.co/gemini/share/d5692e900e71
-https://www.baeldung.com/cs/p-np-np-complete-np-hard
-https://leimao.github.io/blog/P-VS-NP/
-https://news.mit.edu/2009/explainer-pnp
-https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-quantum-computing
-https://ed.ted.com/lessons/the-high-stakes-race-to-make-quantum-computers-work-chiara-decaroli/digdeeper
+- [Difference between deterministic turing machine and non-deterministic turing machine](https://g.co/gemini/share/d5692e900e71)
+- [P, NP, NP-Complete and NP-Hard Problems in Computer Science](https://www.baeldung.com/cs/p-np-np-complete-np-hard)
+- [P VS NP, NP Complete, NP Hard](https://leimao.github.io/blog/P-VS-NP/)
+- [MIT News: Explained: P vs. NP](https://news.mit.edu/2009/explainer-pnp)
+- [What is quantum computing?](https://azure.microsoft.com/en-us/resources/cloud-computing-dictionary/what-is-quantum-computing)
+- [How does Quantum computing works](https://ed.ted.com/lessons/the-high-stakes-race-to-make-quantum-computers-work-chiara-decaroli/digdeeper)
 
 <hr>
 
