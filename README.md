@@ -381,26 +381,24 @@ https://cwiki.apache.org/confluence/display/KAFKA/KIP-447%3A+Producer+scalabilit
 - [LRU Cache Implementation](https://www.interviewcake.com/concept/java/lru-cache)
 
 ### Couchbase
-- https://www.couchbase.com/blog/acid-properties-couchbase-part-1/
-- https://www.couchbase.com/blog/distributed-multi-document-acid-transactions-in-couchbase/
-- https://docs.couchbase.com/java-sdk/current/concept-docs/durability-replication-failure-considerations.html
-- https://docs.couchbase.com/java-sdk/current/hello-world/sample-application.html
-- https://docs.couchbase.com/java-sdk/current/concept-docs/transactions-error-handling.html#transactioncommitambiguousexception
-- https://docs.couchbase.com/java-sdk/current/howtos/distributed-acid-transactions-from-the-sdk.html
-- https://docs.couchbase.com/java-sdk/current/howtos/transactions-single-query.html
-- https://docs.couchbase.com/server/current/learn/data/durability.html
-- https://docs.couchbase.com/server/current/learn/data/transactions.html#implications-when-using-transactions
-- https://www.couchbase.com/blog/optimistic-or-pessimistic-locking-which-one-should-you-pick/
-- https://docs.couchbase.com/server/current/learn/clusters-and-availability/intra-cluster-replication.html
-- https://docs.couchbase.com/server/current/learn/data/transactions.html
+- [ACID Properties and Couchbase](https://www.couchbase.com/blog/acid-properties-couchbase-part-1/)
+- [Transactions](https://docs.couchbase.com/server/current/learn/data/transactions.html) 
+- [Couchbase Transaction](https://docs.couchbase.com/java-sdk/current/howtos/distributed-acid-transactions-from-the-sdk.html)
+- [Implications When Using Transactions](https://docs.couchbase.com/server/current/learn/data/transactions.html#implications-when-using-transactions)
+- [Single Query Transactions](https://docs.couchbase.com/java-sdk/current/howtos/transactions-single-query.html)
+- [Distributed Multi-Document ACID Transactions](https://www.couchbase.com/blog/distributed-multi-document-acid-transactions-in-couchbase/)
+- [Durability](https://docs.couchbase.com/server/current/learn/data/durability.html)
+- [Failure Considerations](https://docs.couchbase.com/java-sdk/current/concept-docs/durability-replication-failure-considerations.html)
+- [Error Handling](https://docs.couchbase.com/java-sdk/current/concept-docs/transactions-error-handling.html#transactioncommitambiguousexception)
+- [Intra-Cluster Replication](https://docs.couchbase.com/server/current/learn/clusters-and-availability/intra-cluster-replication.html)
 
 ### Redis
-- https://redis.io/blog/diving-into-crdts/
-- https://redis.io/active-active/
-- https://redis.io/blog/database-consistency/
-- https://redis.io/learn/operate/redis-at-scale/high-availability/basic-replication
-- https://redis.io/docs/latest/operate/rs/databases/durability-ha/consistency/
-- https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/
+- [CRDT](https://redis.io/blog/diving-into-crdts/)
+- [Active Active](https://redis.io/active-active/)
+- [Consistency](https://redis.io/blog/database-consistency/)
+- [Replication](https://redis.io/learn/operate/redis-at-scale/high-availability/basic-replication)
+- [Consistency](https://redis.io/docs/latest/operate/rs/databases/durability-ha/consistency/)
+- [Scaling](https://redis.io/docs/latest/operate/oss_and_stack/management/scaling/)
 
 ### Mongo
 - [MongoDB In-Memory Database](https://www.mongodb.com/resources/basics/databases/in-memory-database)
